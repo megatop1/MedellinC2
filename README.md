@@ -25,4 +25,4 @@ web
     login.html
     register.html
 ```
-![server](server_design.png)
+![server](../server_design.PNG)
