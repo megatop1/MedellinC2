@@ -26,3 +26,6 @@ web
     register.html
 ```
 ![server](server_design.PNG)
+
+### Commands
+`./medellin init`: Initializes the databases 
