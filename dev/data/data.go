@@ -124,3 +124,27 @@ func InsertListener(name string, port string, protocol string) {
 
 	log.Println("Successfully Created Listener")
 }
+
+func DisplayAllListeners() {
+	row, err := db.Query("SELECT * FROM Listeners")
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	}
+	//close the row once we reach end of the function
+	defer row.Close()
+
+	//run through all the rows and print them out to the terminal
+	for row.Next() {
+		var LID int
+		var Name string
+		var Port int
+		var Protocol string
+		var ActiveConnectedAgents int
+
+		err = row.Scan(&LID, &Name, &Port, &Protocol, &ActiveConnectedAgents)
+		if err != nil { //if there is an issue scanning the row print this error to the console
+			log.Fatalln(err)
+		}
+		log.Println("Listener Name:", Name, "| Port:", Port, "| Connected Agents:", ActiveConnectedAgents)
+	}
+}
