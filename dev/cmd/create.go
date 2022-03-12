@@ -102,14 +102,14 @@ func promptGetSelect(pc promptContent) string {
 func createNewListener() { //function to construct our listener
 	namePromptContent := promptContent{ //prompt user to enter a name for the listener
 		"Please provide a listener name",
-		"What would you like to name your listener?",
+		"Enter a name for your listener: ",
 	}
 	name := promptGetInput(namePromptContent) //capture the name as an input from the user
 
 	//promptContent struct for the port
 	portPromptContent := promptContent{
 		"Please provude a port number",
-		fmt.Sprintf("Enter the port number would you like to use for the listener: %s", name), //pass the name of the listener as an argument
+		fmt.Sprintf("Enter the port number would you like to use for listener %s: ", name), //pass the name of the listener as an argument
 	}
 	port := promptGetInput(portPromptContent) //capture the port number as input from the user
 
