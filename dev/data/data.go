@@ -104,3 +104,20 @@ func CreateAgentTable() {
 	statement.Exec()
 	log.Println("Agents table created")
 }
+
+func InsertListener(name string, port string, protocol string) {
+	InsertListenerSQL := `INSERT INTO Listeners (name, port, protocol)
+	VALUES (?, ?, ?)`
+
+	statement, err := db.Prepare(InsertListenerSQL)
+	if err != nil { // if we get an error, log it to the console
+		log.Fatalln(err)
+	}
+
+	_, err = statement.Exec(name, port, protocol) //execute our statement
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Inserted listener successfully")
+}
