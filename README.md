@@ -31,3 +31,5 @@ web
 
 ### Commands
 `./medellin init`: Initializes the databases 
+`./medellin listeners`: Displays the listeners menu
+`./medellin listeners create`: Create a new listener
