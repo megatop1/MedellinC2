@@ -16,7 +16,10 @@ var initCmd = &cobra.Command{
 	Long:  `Creates the DB, tables, rows and columns.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		data.CreateTable()
+		data.CreateListenersTable()
+		data.CreateUsersTable()
+		data.CreateCommandLogTable()
+		data.CreateAgentTable()
 	},
 }
 

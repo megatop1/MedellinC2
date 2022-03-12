@@ -25,10 +25,33 @@ func OpenDatabase() error {
 	return db.Ping()
 }
 
-func CreateTable() {
-	createTableSQL := `CREATE TABLE IF NOT EXISTS tests (
-		"idNote" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		"word" TEXT	
+func CreateListenersTable() {
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "Listeners" (
+		"LID"	INTEGER NOT NULL,
+		"Name"	TEXT NOT NULL,
+		"Port"	INTEGER NOT NULL,
+		"ActiveConnectedAgents"	INTEGER NOT NULL,
+		PRIMARY KEY("LID" AUTOINCREMENT)
+	);`
+
+	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
+	if err != nil {
+		log.Fatal(err.Error()) //log the error if we get it
+	}
+
+	statement.Exec()
+	log.Println("Listeners table created")
+}
+
+func CreateUsersTable() {
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "Users" (
+		"UID"	INTEGER NOT NULL,
+		"Username"	TEXT NOT NULL,
+		"Password"	TEXT NOT NULL,
+		"IsAdmin"	INTEGER NOT NULL,
+		PRIMARY KEY("UID" AUTOINCREMENT)
 	);`
 
 	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
@@ -38,4 +61,46 @@ func CreateTable() {
 
 	statement.Exec()
 	log.Println("Users table created")
+}
+
+func CreateCommandLogTable() {
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "CommandLog" (
+		"CommandID"	INTEGER NOT NULL,
+		"UUID"	INTEGER NOT NULL,
+		"Result"	INTEGER NOT NULL,
+		PRIMARY KEY("CommandID" AUTOINCREMENT)
+	);`
+
+	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
+	if err != nil {
+		log.Fatal(err.Error()) //log the error if we get it
+	}
+
+	statement.Exec()
+	log.Println("CommandLog table created")
+}
+
+func CreateAgentTable() {
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "Agent" (
+		"AID"	INTEGER NOT NULL,
+		"UUID"	TEXT NOT NULL,
+		"User"	TEXT NOT NULL,
+		"IP"	TEXT NOT NULL,
+		"IsDeleted"	INTEGER NOT NULL,
+		"LastCallback"	INTEGER NOT NULL,
+		"CallbackInterval"	INTEGER NOT NULL,
+		"Jitter"	INTEGER NOT NULL,
+		"Listener"	INTEGER NOT NULL,
+		PRIMARY KEY("AID" AUTOINCREMENT)
+	);`
+
+	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
+	if err != nil {
+		log.Fatal(err.Error()) //log the error if we get it
+	}
+
+	statement.Exec()
+	log.Println("Agents table created")
 }
