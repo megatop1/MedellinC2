@@ -122,5 +122,5 @@ func InsertListener(name string, port string, protocol string) {
 		log.Fatalln(err)
 	}
 
-	log.Println("Inserted listener successfully")
+	log.Println("Successfully Created Listener")
 }
