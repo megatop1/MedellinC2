@@ -27,5 +27,7 @@ web
 ```
 ![server](server_design.PNG)
 
+![schema](schema.PNG)
+
 ### Commands
 `./medellin init`: Initializes the databases 
