@@ -109,8 +109,8 @@ func CreateAgentTable() {
 func InsertListener(name string, port string, protocol string) {
 	//randomly generate a LID (Listeners Unique ID)
 
-	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol)
-	VALUES (?, ?, ?)`
+	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol, ActiveConnectedAgents)
+	VALUES (?, ?, ?, 0)`
 
 	statement, err := db.Prepare(InsertListenerSQL)
 	if err != nil { // if we get an error, log it to the console
