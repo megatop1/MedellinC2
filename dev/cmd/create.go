@@ -104,20 +104,20 @@ func createNewListener() { //function to construct our listener
 		"Please provide a listener name",
 		"Enter a name for your listener: ",
 	}
-	name := promptGetInput(namePromptContent) //capture the name as an input from the user
+	Name := promptGetInput(namePromptContent) //capture the name as an input from the user
 
 	//promptContent struct for the port
 	portPromptContent := promptContent{
 		"Please provude a port number",
-		fmt.Sprintf("Enter the port number would you like to use for listener %s: ", name), //pass the name of the listener as an argument
+		fmt.Sprintf("Enter the port number would you like to use for listener %s: ", Name), //pass the name of the listener as an argument
 	}
-	port := promptGetInput(portPromptContent) //capture the port number as input from the user
+	Port := promptGetInput(portPromptContent) //capture the port number as input from the user
 
 	protocolPromptContent := promptContent{ //prompt for user to enter in the protocol
 		"Please provide a protocol",
-		fmt.Sprintf("Select the protocol do you want to use for your listener: ", name), //pass the listener name as an argument
+		fmt.Sprintf("Select the protocol do you want to use for your listener: ", Name), //pass the listener name as an argument
 	}
-	protocol := promptGetSelect(protocolPromptContent) //capture the protocol as an input from the user
+	Protocol := promptGetSelect(protocolPromptContent) //capture the protocol as an input from the user
 
-	data.InsertListener(name, port, protocol)
+	data.InsertListener(Name, Port, Protocol)
 }

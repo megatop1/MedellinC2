@@ -31,6 +31,7 @@ func CreateListenersTable() {
 		"LID"	INTEGER NOT NULL,
 		"Name"	TEXT NOT NULL,
 		"Port"	INTEGER NOT NULL,
+		"Protocol" TEXT NOT NULL,
 		"ActiveConnectedAgents"	INTEGER NOT NULL,
 		PRIMARY KEY("LID" AUTOINCREMENT)
 	);`
@@ -106,7 +107,9 @@ func CreateAgentTable() {
 }
 
 func InsertListener(name string, port string, protocol string) {
-	InsertListenerSQL := `INSERT INTO Listeners (name, port, protocol)
+	//randomly generate a LID (Listeners Unique ID)
+
+	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol)
 	VALUES (?, ?, ?)`
 
 	statement, err := db.Prepare(InsertListenerSQL)
