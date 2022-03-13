@@ -16,6 +16,7 @@ var listCmd = &cobra.Command{
 	Long:  `List all of the active listeners`,
 	Run: func(cmd *cobra.Command, args []string) {
 		data.DisplayAllListeners()
+		data.GetIP()
 	},
 }
 

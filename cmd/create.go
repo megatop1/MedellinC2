@@ -107,10 +107,17 @@ func createNewListener() { //function to construct our listener
 
 	//promptContent struct for the port
 	portPromptContent := promptContent{
-		"Please provude a port number",
+		"Please provide a port number",
 		fmt.Sprintf("Enter the port number would you like to use for listener %s: ", Name), //pass the name of the listener as an argument
 	}
 	Port := promptGetInput(portPromptContent) //capture the port number as input from the user
+
+	//promptContent struct for the IP
+	IPPromptContent := promptContent{
+		"Please provide the IP address for the listener",
+		fmt.Sprintf("Enter the IP Address would you like to use for listener %s: ", Name), //pass the name of the listener as an argument
+	}
+	IP := promptGetInput(IPPromptContent) //capture the port number as input from the user
 
 	protocolPromptContent := promptContent{ //prompt for user to enter in the protocol
 		"Please provide a protocol",
@@ -118,5 +125,9 @@ func createNewListener() { //function to construct our listener
 	}
 	Protocol := promptGetSelect(protocolPromptContent) //capture the protocol as an input from the user
 
-	data.InsertListener(Name, Port, Protocol)
+	data.InsertListener(Name, Port, IP, Protocol)
+
+	// Generate the listener using data from the user
+	// Create the TCP connection to your attackers Netcat
+
 }
