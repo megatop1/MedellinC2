@@ -2,8 +2,8 @@ package data
 
 import (
 	"database/sql" //go database driver package
-	"fmt"
 	"log"
+	"strconv"
 
 	//sqlite3 package
 	_ "github.com/mattn/go-sqlite3"
@@ -152,12 +152,24 @@ func DisplayAllListeners() {
 	}
 }
 
-func GetIP() {
+func GetIP() string {
 	var IP string
 	err := db.QueryRow("SELECT IP FROM Listeners ORDER BY LID LIMIT 1").Scan(&IP) //Grab IP from the DB
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
 	}
-	//close the row once we reach end of the function
-	fmt.Printf("Your IP is: %s", IP)
+	//return the IP
+	return IP
+}
+
+func GetPort() string {
+	var port int
+	err := db.QueryRow("SELECT Port FROM Listeners ORDER BY LID LIMIT 1").Scan(&port) //Grab Port from the DB
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	}
+	//convert port integer to string value
+	strPort := strconv.Itoa(port)
+	//return the Port
+	return strPort
 }

