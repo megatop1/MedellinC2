@@ -124,7 +124,7 @@ func InsertListener(name string, port string, IP string, protocol string) {
 		log.Fatalln(err)
 	}
 
-	log.Println("Successfully Created Listener")
+	log.Println("Successfully Wrote Listener to Database, Proceeding to Generate Listener...")
 }
 
 func DisplayAllListeners() {
