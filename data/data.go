@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql" //go database driver package
+	"fmt"
 	"log"
 
 	//sqlite3 package
@@ -118,7 +119,7 @@ func InsertListener(name string, port string, IP string, protocol string) {
 		log.Fatalln(err)
 	}
 
-	_, err = statement.Exec(name, port, IP, protocol) //execute our statement
+	_, err = statement.Exec(name, port, protocol, IP) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -143,7 +144,7 @@ func DisplayAllListeners() {
 		var IP string
 		var ActiveConnectedAgents int
 
-		err = row.Scan(&LID, &Name, &Port, &Protocol, &ActiveConnectedAgents)
+		err = row.Scan(&LID, &Name, &Port, &Protocol, &IP, &ActiveConnectedAgents)
 		if err != nil { //if there is an issue scanning the row print this error to the console
 			log.Fatalln(err)
 		}
@@ -152,11 +153,11 @@ func DisplayAllListeners() {
 }
 
 func GetIP() {
-	IP, err := db.Query("SELECT IP FROM Listeners WHERE LID=(SELECT max(LID) FROM Listeners)") //Grab IP from the DB
+	var IP string
+	err := db.QueryRow("SELECT IP FROM Listeners ORDER BY LID LIMIT 1").Scan(&IP) //Grab IP from the DB
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
 	}
 	//close the row once we reach end of the function
-	defer IP.Close()
-	println("Your IP is:", IP)
+	fmt.Printf("Your IP is: %s", IP)
 }
