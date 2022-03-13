@@ -5,13 +5,10 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"net"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -138,35 +135,7 @@ func createNewListener() { //function to construct our listener
 	// Create the TCP connection to your attackers Netcat
 	//var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
 
-	/*
-		connection, err := net.Dial("tcp", ipAndPortString) //dial function connects to a server address, ("protocol", "IP", "Port")
-		if err != nil {                                     //if there is an error
-			fmt.Print(err.Error()) //print the error
-			if nil != connection {
-				connection.Close()
-			}
-		}
-		println("Connection IP and Port are: " + ipAndPortString)
-		//println("Listener successfully started") */
-
-	//CONCURRENT TCP SERVER (LISTENER)
-	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
-	listener, err := net.Listen("tcp4", ipAndPortString) //create listener and listen over tcp protocol over user defined Ip and port
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer listener.Close()
-	println("listener started")
-	for {
-		connection, err := listener.Accept()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		go handleConnection(connection)
-		count++
-	}
+	generateListener()
 
 	//Accept commands from attacker
 	/*for {
@@ -181,7 +150,6 @@ func createNewListener() { //function to construct our listener
 	} */
 }
 
-/*
 func generateListener() {
 	//CONCURRENT TCP SERVER (LISTENER)
 	var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
@@ -198,11 +166,12 @@ func generateListener() {
 			fmt.Println(err)
 			return
 		}
-		go handleConnection(connection)
+		go handleConnection(connection) //the go command runs this function in the background
 		count++
 	}
-}*/
+}
 
+/*
 //function to handle and process incoming connections to the listener
 func handleConnection(connection net.Conn) {
 	fmt.Print("Successfully connected to agent\n")
@@ -222,4 +191,4 @@ func handleConnection(connection net.Conn) {
 		connection.Write([]byte(string(counter)))
 	}
 	connection.Close()
-}
+} */

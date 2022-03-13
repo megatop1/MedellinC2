@@ -13,4 +13,6 @@ func main() {
 	//Open the database connection
 	data.OpenDatabase()
 	cmd.Execute()
+	//Keep the server consistently running
+
 }
