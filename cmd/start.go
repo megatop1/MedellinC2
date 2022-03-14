@@ -30,7 +30,7 @@ func init() {
 }
 
 func handleConnection(c net.Conn) {
-	fmt.Print(".")
+	fmt.Print("Agent successfully connected to MedellinC2 Server")
 	for {
 		netData, err := bufio.NewReader(c).ReadString('\n')
 		if err != nil {
@@ -50,13 +50,6 @@ func handleConnection(c net.Conn) {
 }
 
 func listenForConnections() {
-	/*	arguments := os.Args
-		if len(arguments) == 1 {
-			fmt.Println("Please provide a port number!")
-			return
-		}
-
-		PORT := ":" + arguments[1] */
 	l, err := net.Listen("tcp4", ":8080")
 	if err != nil {
 		fmt.Println(err)

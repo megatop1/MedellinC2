@@ -159,8 +159,8 @@ func generateListener() {
 		return
 	}
 	defer listener.Close()
-	println("listener started")
-	for {
+	println("listener created")
+	/*for {
 		connection, err := listener.Accept()
 		if err != nil {
 			fmt.Println(err)
@@ -168,7 +168,7 @@ func generateListener() {
 		}
 		go handleConnection(connection) //the go command runs this function in the background
 		count++
-	}
+	} */
 }
 
 /*
