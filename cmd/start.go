@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
 
@@ -61,6 +62,8 @@ func listenForConnections() {
 	`
 	println(logo)
 	println("Medlelin C2 Server Successfully Started...")
+	println("The open ports are: " + data.GetListenerPorts())
+	checkListenerPorts()
 
 	l, err := net.Listen("tcp4", ":8080")
 	if err != nil {
@@ -80,7 +83,10 @@ func listenForConnections() {
 	}
 }
 
-//Function to Get List of all ports listeners are listenening over
+//Function to parse listener's ports for active listeners in the database.
 func checkListenerPorts() {
+	//use the strings.Split function to split a string into its comma separated values
+	portList := strings.Split(data.GetListenerPorts(), ",")
 
+	fmt.Println(portList[0])
 }
