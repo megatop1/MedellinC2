@@ -34,7 +34,7 @@ func init() {
 }
 
 func handleConnection(c net.Conn) {
-	fmt.Print("Agent successfully connected to MedellinC2 Server")
+	fmt.Print("Agent successfully connected to MedellinC2 Server\n")
 	for {
 		netData, err := bufio.NewReader(c).ReadString('\n')
 		if err != nil {
