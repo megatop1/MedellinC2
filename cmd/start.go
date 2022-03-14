@@ -50,6 +50,18 @@ func handleConnection(c net.Conn) {
 }
 
 func listenForConnections() {
+	logo := `
+	_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
+|\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
+\ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
+ \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
+  \ \  \    \ \  \ \  \_|\ \ \  \_\\ \ \  \_|\ \ \  \____\ \  \____\ \  \ \  \\ \  \       \ \  \____  /  /_/__  
+   \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\ \__\\ \__\       \ \_______\\________\
+    \|__|     \|__|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|\|__| \|__|        \|_______|\|_______|
+	`
+	println(logo)
+	println("Medlelin C2 Server Successfully Started...")
+
 	l, err := net.Listen("tcp4", ":8080")
 	if err != nil {
 		fmt.Println(err)
@@ -66,4 +78,9 @@ func listenForConnections() {
 		go handleConnection(c)
 		count++
 	}
+}
+
+//Function to Get List of all ports listeners are listenening over
+func checkListenerPorts() {
+
 }
