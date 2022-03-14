@@ -176,7 +176,7 @@ func GetPort() string {
 
 func GetListenerPorts() string {
 	var portList string
-	err := db.QueryRow("SELECT group_concat(Port, ', ') FROM Listeners").Scan(&portList) //Grab Port from the DB
+	err := db.QueryRow("SELECT group_concat(Port, ',') FROM Listeners").Scan(&portList) //Grab Port from the DB
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
 	}
