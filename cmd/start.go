@@ -55,7 +55,7 @@ func handleConnection(c net.Conn) {
 
 func listenForConnections() {
 	logo := `
-	_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
+_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
 |\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
 \ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
  \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
@@ -65,7 +65,7 @@ func listenForConnections() {
 	`
 	println(logo)
 	println("Medlelin C2 Server Successfully Started...")
-	println("The open ports are: " + data.GetListenerPorts())
+	println("Listeners are running over ports: " + data.GetListenerPorts())
 	print("the length of checkListenerPorts is ")
 	fmt.Println(len(checkListenerPorts()))
 
