@@ -89,8 +89,9 @@ _____ ______   _______   ________  _______   ___       ___       ___  ________  
 	for _, port := range checkListenerPorts() { //When you don't really care about the index use _,
 		go handlePorts(port)
 	}
-	time.Sleep(time.Second * 30)
-
+	for {
+		time.Sleep(time.Second * 30) //without this, we cannot connect over two ports at once
+	}
 }
 
 //Function to parse listener's ports for active listeners in the database.
