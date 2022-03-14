@@ -66,24 +66,6 @@ _____ ______   _______   ________  _______   ___       ___       ___  ________  
 	println(logo)
 	println("Medlelin C2 Server Successfully Started...")
 	println("Listeners are running over ports: " + data.GetListenerPorts())
-	print("the length of checkListenerPorts is ")
-	fmt.Println(len(checkListenerPorts()))
-
-	/* //handlePorts()
-	var numOfPorts = len(checkListenerPorts())
-	println("number of ports ", numOfPorts)
-
-	for i := range checkListenerPorts() {
-		//fmt.Println(i, element)
-		println(checkListenerPorts()[i])
-		handlePorts(checkListenerPorts()[i])
-	}
-
-	/* for i := 0; i <= numOfPorts; i++ {
-		//print the index of the port array
-		print(checkListenerPorts())
-		//handlePorts(strconv.Itoa(i))
-	} */
 
 	//Allows us to listen over multiple ports
 	for _, port := range checkListenerPorts() { //When you don't really care about the index use _,
@@ -98,7 +80,6 @@ _____ ______   _______   ________  _______   ___       ___       ___  ________  
 func checkListenerPorts() []string {
 	//use the strings.Split function to split a string into its comma separated values
 	return strings.Split(data.GetListenerPorts(), ",")
-	//fmt.Println(portList)
 }
 
 func handlePorts(port string) {
