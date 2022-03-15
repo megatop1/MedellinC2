@@ -108,6 +108,23 @@ func CreateAgentTable() {
 	log.Println("Agents table created")
 }
 
+func CreateLaunchersTable() {
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS "Launchers" (
+		"LauncherID"	INTEGER NOT NULL,
+		"Name"	TEXT NOT NULL,
+		PRIMARY KEY("LauncherID" AUTOINCREMENT)
+	);`
+
+	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
+	if err != nil {
+		log.Fatal(err.Error()) //log the error if we get it
+	}
+
+	statement.Exec()
+	log.Println("CommandLog table created")
+}
+
 func InsertListener(name string, port string, IP string, protocol string) {
 	//randomly generate a LID (Listeners Unique ID)
 
@@ -183,4 +200,19 @@ func GetListenerPorts() string {
 
 	//return the Port
 	return portList
+}
+
+func InsertLauncher(name string) {
+	InsertLauncherSQL := `INSERT INTO Launchers (Name)
+	VALUES (?)`
+
+	statement, err := db.Prepare(InsertLauncherSQL)
+	if err != nil { // if we get an error, log it to the console
+		log.Fatalln(err)
+	}
+
+	_, err = statement.Exec(name) //execute our statement
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

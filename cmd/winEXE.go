@@ -5,9 +5,14 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 
+	//"github.com/manifoldco/promptui"
+	"log"
+
+	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
+	//"os"
+	//"errors"
 )
 
 // winEXECmd represents the winEXE command
@@ -21,7 +26,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("winEXE called")
+		//fmt.Println("winEXE called")
+		createNewLauncher()
 	},
 }
 
@@ -37,4 +43,15 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// winEXECmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func createNewLauncher() { //function to construct our launcher
+	namePromptContent := promptContent{ //prompt user to enter a name for the listener
+		"Please provide a launcher name",
+		"What would you like to name your launcher?: ",
+	}
+	name := promptGetInput(namePromptContent) //capture the name as an input from the user
+	data.InsertLauncher(name)
+
+	log.Println("Inserted launcher successfully")
 }

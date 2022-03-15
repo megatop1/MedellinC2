@@ -20,6 +20,7 @@ var initCmd = &cobra.Command{
 		data.CreateUsersTable()
 		data.CreateCommandLogTable()
 		data.CreateAgentTable()
+		data.CreateLaunchersTable()
 	},
 }
 
