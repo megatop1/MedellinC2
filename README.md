@@ -30,3 +30,5 @@ MedellinC2
 - `./MedellinC2 listeners create`: Create a new listener
 - `./MedellinC2 server`: Displays the server menu
 - `./MedellinC2 server start`: Starts the C2 server, which allows listeners to listen for connections from agents
+- `./Medellinc2 launcher`: Displays the launchers menu
+- `./MedellinC2 launcher winEXE`: Create a windows launcher (payload)
