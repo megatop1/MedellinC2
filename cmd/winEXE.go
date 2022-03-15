@@ -51,7 +51,14 @@ func createNewLauncher() { //function to construct our launcher
 		"What would you like to name your launcher?: ",
 	}
 	name := promptGetInput(namePromptContent) //capture the name as an input from the user
-	data.InsertLauncher(name)
+
+	listenerPromptContent := promptContent{ //prompt user to enter a name for the listener
+		"Please enter the listener for the launcher",
+		"What listener would you like your launcher to listen for connections over?: ",
+	}
+	listener := promptGetInput(listenerPromptContent) //capture the name as an input from the user
+
+	data.InsertLauncher(name, listener)
 
 	log.Println("Inserted launcher successfully")
 }

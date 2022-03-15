@@ -113,6 +113,7 @@ func CreateLaunchersTable() {
 	CREATE TABLE IF NOT EXISTS "Launchers" (
 		"LauncherID"	INTEGER NOT NULL,
 		"Name"	TEXT NOT NULL,
+		"Listener" TEXT NOT NULL,
 		PRIMARY KEY("LauncherID" AUTOINCREMENT)
 	);`
 
@@ -202,16 +203,16 @@ func GetListenerPorts() string {
 	return portList
 }
 
-func InsertLauncher(name string) {
-	InsertLauncherSQL := `INSERT INTO Launchers (Name)
-	VALUES (?)`
+func InsertLauncher(name string, listener string) {
+	InsertLauncherSQL := `INSERT INTO Launchers (Name, Listener)
+	VALUES (?, ?)`
 
 	statement, err := db.Prepare(InsertLauncherSQL)
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)
 	}
 
-	_, err = statement.Exec(name) //execute our statement
+	_, err = statement.Exec(name, listener) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}
