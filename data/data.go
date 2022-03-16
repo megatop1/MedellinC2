@@ -182,7 +182,7 @@ func GetIP() string {
 
 func GetPort() string {
 	var port int
-	err := db.QueryRow("SELECT Port FROM Listeners ORDER BY LID LIMIT 1").Scan(&port) //Grab Port from the DB
+	err := db.QueryRow("SELECT Port FROM Listeners ORDER BY LID DESC LIMIT 1").Scan(&port) //Grab Port from the DB
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
 	}

