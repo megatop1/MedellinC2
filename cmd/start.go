@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
@@ -65,6 +64,7 @@ func handleConnection(c net.Conn) {
 	c.Close()
 }
 
+/*
 func listenForConnections() {
 
 	//println(logo)
@@ -79,13 +79,7 @@ func listenForConnections() {
 		time.Sleep(time.Second * 30) //without this, we cannot connect over two ports at once
 	}
 
-}
-
-//Function to parse listener's ports for active listeners in the database.
-func checkListenerPorts() []string {
-	//use the strings.Split function to split a string into its comma separated values
-	return strings.Split(data.GetListenerPorts(), ",")
-}
+} */
 
 func handlePorts(port string) {
 	l, err := net.Listen("tcp4", ":"+port)
@@ -168,7 +162,7 @@ func handleClientRequest(con net.Conn) {
 
 func server() {
 	println(logo)
-	//test()
+	//checkListenerPorts()
 	listener, err := net.Listen("tcp", "0.0.0.0:8000") //start TCP server on 8000
 	if err != nil {
 		log.Fatalln(err)
@@ -183,12 +177,9 @@ func server() {
 			continue
 		}
 
-		//test
-		test()
-		//end of test
-
 		// If you want, you can increment a counter here and inject to handleClientRequest below as client identifier
 		go handleClientRequest(con)
+
 		//go acceptLoop(listener2) //run Accept Loop in its own goroutine
 		//check if more ports are open
 	}
@@ -209,27 +200,19 @@ func acceptLoop(l net.Listener) {
 	}
 }
 
-func test() {
+func checkListenerPorts() {
 	//Check all open ports in Listeners table in a loop and allow connections over those ports
-	//format checkListenerPorts()
+	//format GetListenerPorts()
 	s := data.GetListenerPorts() //string that contains every port
-	//v := strings.SplitAfter(s, ",")
 	v := strings.SplitN(s, ",", len(s))
 	//fmt.Print(v)
 	for i := 0; i < len(v); i++ {
-		println(v[i])
+		//println(v[i])
 		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i])
 		if err != nil { //error handling
 			log.Fatal(err)
 		}
 		go acceptLoop(listener2)
 	}
-	/*
-		for _, port := range ListenerPorts() { //for all ports in the listeners table in the DB
-			listener2, err := net.Listen("tcp", "0.0.0.0:"+s[port]) //create listener over port
-			if err != nil {                                      //error handling
-				log.Fatal(err)
-			}
-			go acceptLoop(listener2)
-		} */
+
 }
