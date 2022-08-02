@@ -162,7 +162,7 @@ func handleClientRequest(con net.Conn) {
 
 func server() {
 	println(logo)
-	//checkListenerPorts()
+
 	listener, err := net.Listen("tcp", "0.0.0.0:8000") //start TCP server on 8000
 	if err != nil {
 		log.Fatalln(err)
@@ -177,11 +177,10 @@ func server() {
 			continue
 		}
 
-		// If you want, you can increment a counter here and inject to handleClientRequest below as client identifier
+		//go handleConnection(con)
 		go handleClientRequest(con)
+		//go checkListenerPorts() THIS PIECE OF CODE BREAKS MULTIPLE CONNECTIONS OVER SAME PORT
 
-		//go acceptLoop(listener2) //run Accept Loop in its own goroutine
-		//check if more ports are open
 	}
 }
 
