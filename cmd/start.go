@@ -64,23 +64,6 @@ func handleConnection(c net.Conn) {
 	c.Close()
 }
 
-/*
-func listenForConnections() {
-
-	//println(logo)
-	//println("Medlelin C2 Server Successfully Started...")
-	//println("Listeners are running over ports: " + data.GetListenerPorts())
-
-	//Allows us to listen over multiple ports
-	for _, port := range checkListenerPorts() { //When you don't really care about the index use _,
-		go handlePorts(port)
-	}
-	for {
-		time.Sleep(time.Second * 30) //without this, we cannot connect over two ports at once
-	}
-
-} */
-
 func handlePorts(port string) {
 	l, err := net.Listen("tcp4", ":"+port)
 
@@ -170,6 +153,7 @@ func server() {
 	defer listener.Close()
 
 	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+	checkListenerPorts() //FIX THIS, ITS LOCATION AND THE FUNCTION'S CODE ITSELF AREN'T UP TO SNUFF
 	for {
 		con, err := listener.Accept()
 		if err != nil {
@@ -177,9 +161,9 @@ func server() {
 			continue
 		}
 
-		//go handleConnection(con)
+		go checkListenerPorts()
 		go handleClientRequest(con)
-		//go checkListenerPorts() THIS PIECE OF CODE BREAKS MULTIPLE CONNECTIONS OVER SAME PORT
+		//go checkListenerPorts() //THIS PIECE OF CODE BREAKS MULTIPLE CONNECTIONS OVER SAME PORT
 
 	}
 }
@@ -205,13 +189,30 @@ func checkListenerPorts() {
 	s := data.GetListenerPorts() //string that contains every port
 	v := strings.SplitN(s, ",", len(s))
 	//fmt.Print(v)
+	print("current listeners running on ports: ")
 	for i := 0; i < len(v); i++ {
-		//println(v[i])
-		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i])
-		if err != nil { //error handling
-			log.Fatal(err)
+		print(v[i] + " ")
+
+		listener, err := net.Listen("tcp", "0.0.0.0:"+v[i]) //start TCP server on 8000
+		if err != nil {
+			log.Fatalln(err)
 		}
-		go acceptLoop(listener2)
+		//defer listener.Close()
+		go openPorts(listener) //allows for multiple connections over the same port
+	}
+
+}
+
+//this function has to be fixed to stop the "use of a closed network connection error"
+func openPorts(listener net.Listener) {
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			log.Println(err)
+		}
+
+		go handleClientRequest(con) //error spamming of "use of a closed network connection"
+		//defer listener.Close()
 	}
 
 }
