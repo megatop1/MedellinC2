@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
@@ -152,19 +153,22 @@ func server() {
 	}
 	defer listener.Close()
 
+	//time.Sleep((2 * time.Second))
+	for range time.Tick(time.Second * 10) {
+		go checkListenerPorts()
+	}
+
 	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
-	checkListenerPorts() //FIX THIS, ITS LOCATION AND THE FUNCTION'S CODE ITSELF AREN'T UP TO SNUFF
+	//checkListenerPorts() //FIX THIS, ITS LOCATION AND THE FUNCTION'S CODE ITSELF AREN'T UP TO SNUFF
 	for {
+		//go checkListenerPorts()
 		con, err := listener.Accept()
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-
-		go checkListenerPorts()
+		//go checkListenerPorts()
 		go handleClientRequest(con)
-		//go checkListenerPorts() //THIS PIECE OF CODE BREAKS MULTIPLE CONNECTIONS OVER SAME PORT
-
 	}
 }
 
@@ -183,6 +187,7 @@ func acceptLoop(l net.Listener) {
 	}
 }
 
+//Purpose: Successfully checks for all open ports (stored in database)
 func checkListenerPorts() {
 	//Check all open ports in Listeners table in a loop and allow connections over those ports
 	//format GetListenerPorts()
@@ -191,9 +196,10 @@ func checkListenerPorts() {
 	//fmt.Print(v)
 	print("current listeners running on ports: ")
 	for i := 0; i < len(v); i++ {
+		//time.Sleep((2 * time.Second))
 		print(v[i] + " ")
 
-		listener, err := net.Listen("tcp", "0.0.0.0:"+v[i]) //start TCP server on 8000
+		listener, err := net.Listen("tcp", "0.0.0.0:0") //start TCP server on 8000
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -203,16 +209,15 @@ func checkListenerPorts() {
 
 }
 
-//this function has to be fixed to stop the "use of a closed network connection error"
+//Purpose: Will continuously update open ports, when a user creates a new listener, then the port will be opened immediatly
 func openPorts(listener net.Listener) {
 	for {
 		con, err := listener.Accept()
 		if err != nil {
 			log.Println(err)
 		}
-
-		go handleClientRequest(con) //error spamming of "use of a closed network connection"
-		//defer listener.Close()
+		//time.Sleep(time.Second)
+		go handleClientRequest(con) //without this, a 2nd connection on the same port can connect but CANNOT run commands on the remote host, hence the go in the beginning
+		defer listener.Close()
 	}
-
 }
