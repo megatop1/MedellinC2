@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	//sqlite3 package
-	"github.com/google/uuid"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -91,8 +91,7 @@ func CreateAgentTable() {
 		"AID"	INTEGER NOT NULL,
 		"UUID"	TEXT NOT NULL,
 		"RemoteIP"	TEXT NOT NULL,
-		"IsDeleted"	INTEGER NOT NULL,
-		"Listener"	INTEGER NOT NULL,
+		"Hostname" TEXT NOT NULL,
 		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
 
@@ -219,19 +218,16 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 	}
 }
 
-func InsertAgent(UUID string, RemoteIP string, IsDeleted string, Listener string) {
-	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, IsDeleted, Listener)
-	VALUES (?, ?, ?, ?)`
+func InsertAgent(UUID string, RemoteIP string, Hostname string) {
+	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname)
+	VALUES (?, ?, ?)`
 
 	statement, err := db.Prepare(InsertAgentSQL)
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)
 	}
 
-	//Code to randomly generate UUID
-	id := uuid.New()
-
-	_, err = statement.Exec(id, RemoteIP, IsDeleted, Listener) //execute our statement
+	_, err = statement.Exec(UUID, RemoteIP, Hostname) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}

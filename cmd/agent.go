@@ -10,6 +10,7 @@ import (
 	"log"
 	"os/exec"
 
+	"github.com/google/uuid"
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
@@ -37,10 +38,24 @@ func getAgentInfo() {
 	userResult := bytes.NewBuffer(user).String()
 	fmt.Println("Username: ", userResult)
 
+	//generate UUID
+	//Code to randomly generate UUID
+	id := uuid.New().String()
+	print("UUID: ")
+	fmt.Print(id)
+	print("\n")
+
+	//get the IP
+	ipcmd := "hostname -I"
+	ipaddress, err := exec.Command(ipcmd).Output()
+	ipResult := bytes.NewBuffer(ipaddress).String()
+	fmt.Println("IP Address: ", ipResult)
+
+	generateAgent(id, ipResult, hostnameResult)
 }
 
-func generateAgent(UUID string, RemoteIP string, IsDeleted string, Listener string) {
-	data.InsertAgent(UUID, RemoteIP, IsDeleted, Listener)
+func generateAgent(UUID, RemoteIP string, Hostname string) {
+	data.InsertAgent(UUID, RemoteIP, Hostname)
 }
 
 //agent in the background
