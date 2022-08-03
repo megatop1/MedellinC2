@@ -1,5 +1,18 @@
 # MedellinC2
-Welcome to Medellin C2! The development of this C2 is being used to enhance my coding knowledge, and learn more about red teaming. 
+_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
+|\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
+\ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
+ \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
+  \ \  \    \ \  \ \  \_|\ \ \  \_\\ \ \  \_|\ \ \  \____\ \  \____\ \  \ \  \\ \  \       \ \  \____  /  /_/__  
+   \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\ \__\\ \__\       \ \_______\\________\
+    \|__|     \|__|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|\|__| \|__|        \|_______|\|_______|
+
+Welcome to Medellin C2! The development of this C2 is being used to enhance my coding knowledge, and learn more about red teaming. This C2 will work with windows and linux agents. 
+
+### Current Features
+- Create Listeners, even with the server running it will automatically notice a new listener has been made 
+- Accept multiple connections to a single port/multiple ports simotaneously 
+- Create a PowerShell launcher (payload)
 
 ### Structure
 ```
@@ -19,8 +32,6 @@ launchers
     | 
     (Contains auto-generated launchers)
 MedellinC2 (executable)
-
-MedellinC2
 ```
 ![server](server_design.PNG)
 
@@ -35,3 +46,10 @@ MedellinC2
 - `./Medellinc2 launcher`: Displays the launchers menu
 - `./MedellinC2 launcher windows`: Create a windows launcher (payload)
 - `./MedellinC2 launcher linux`: Creates a linux launcher (payload)
+
+### Future
+- Create agents workflow to execute commands on remote machines 
+- Add in modules (tasks) to run on agents 
+- Make the CLI look nicer and more user friendly 
+- Add encryption to communication channels 
+- Optimize performance 

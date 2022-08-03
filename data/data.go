@@ -89,12 +89,8 @@ func CreateAgentTable() {
 	CREATE TABLE IF NOT EXISTS "Agent" (
 		"AID"	INTEGER NOT NULL,
 		"UUID"	TEXT NOT NULL,
-		"User"	TEXT NOT NULL,
-		"IP"	TEXT NOT NULL,
+		"RemoteIP"	TEXT NOT NULL,
 		"IsDeleted"	INTEGER NOT NULL,
-		"LastCallback"	INTEGER NOT NULL,
-		"CallbackInterval"	INTEGER NOT NULL,
-		"Jitter"	INTEGER NOT NULL,
 		"Listener"	INTEGER NOT NULL,
 		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
