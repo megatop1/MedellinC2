@@ -7,6 +7,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -151,11 +152,23 @@ func createWindowsPayload() {
 
 /* PowerShell */
 func powershellLauncher() {
+
+	/* Create pspayload.ps1 file and place in inside of the lauchers folder */
 	path := filepath.Join("launchers", "pspayload.ps1")
 	fmt.Println(path)
 	file, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	/* Generate the code for the file */
+	val := "old falcon\n"
+	data := []byte(val)
+
+	err2 := ioutil.WriteFile("launchers/"+"pspayload.ps1", data, 0)
+
+	if err != nil {
+		log.Fatal(err2)
 	}
 	fmt.Println("PowerShell Launcher successfully created")
 	defer file.Close()
