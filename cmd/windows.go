@@ -7,7 +7,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -132,7 +134,41 @@ func createWindowsPayload() {
 
 	data.InsertLauncher(payloadName, payload, jitter, listenerIP, payloadType)
 
+	//convert to switch statement at some point
+	if payloadType != "" {
+		if payloadType == "exe" {
+			print("generating executable launcher...\n")
+		} else if payloadType == "powershell" {
+			print("generating powershell launcher...\n")
+			powershellLauncher()
+		} else if payloadType == "batch" {
+			print("generating batch (cmd) launcher...\n")
+		}
+	}
+
 	print("Launcher created\n")
+}
+
+/* PowerShell */
+func powershellLauncher() {
+	path := filepath.Join("launchers", "pspayload.ps1")
+	fmt.Println(path)
+	file, err := os.Create(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("PowerShell Launcher successfully created")
+	defer file.Close()
+}
+
+/* Executable */
+
+func exeLauncher() {
+
+}
+
+func batchLauncher() {
+
 }
 
 func init() {
