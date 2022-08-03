@@ -5,6 +5,12 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"os/exec"
+
+	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
 
@@ -17,15 +23,31 @@ var agentCmd = &cobra.Command{
 	`,
 }
 
+func getAgentInfo() {
+	//get the hostname
+	hostname, err := exec.Command("hostname", "-f").Output() // Agent's hostname
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	hostnameResult := bytes.NewBuffer(hostname).String()
+	fmt.Println("Hostname: ", hostnameResult)
+	//get the user
+	user, err := exec.Command("whoami").Output() // Agent's Username
+	userResult := bytes.NewBuffer(user).String()
+	fmt.Println("Username: ", userResult)
+
+}
+
+func generateAgent(UUID string, RemoteIP string, IsDeleted string, Listener string) {
+	data.InsertAgent(UUID, RemoteIP, IsDeleted, Listener)
+}
+
+//agent in the background
+func agentForeground() {
+
+}
+
 func init() {
 	rootCmd.AddCommand(agentCmd)
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// launcherCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// launcherCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

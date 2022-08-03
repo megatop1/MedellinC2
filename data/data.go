@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	//sqlite3 package
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -213,6 +214,24 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 	}
 
 	_, err = statement.Exec(RemoteIP, Listener, ListenerIP, RemotePort, Jitter, PayloadType) //execute our statement
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func InsertAgent(UUID string, RemoteIP string, IsDeleted string, Listener string) {
+	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, IsDeleted, Listener)
+	VALUES (?, ?, ?, ?)`
+
+	statement, err := db.Prepare(InsertAgentSQL)
+	if err != nil { // if we get an error, log it to the console
+		log.Fatalln(err)
+	}
+
+	//Code to randomly generate UUID
+	id := uuid.New()
+
+	_, err = statement.Exec(id, RemoteIP, IsDeleted, Listener) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}
