@@ -114,7 +114,7 @@ func CreateLaunchersTable() {
 		"LauncherID" INTEGER NOT NULL,
 		"RemoteIP"	TEXT NOT NULL,
 		"Listener"	TEXT NOT NULL,
-		"Listener IP" TEXT NOT NULL,
+		"ListenerIP" TEXT NOT NULL,
 		"Jitter"	TEXT NOT NULL,
 		PRIMARY KEY("LauncherID" AUTOINCREMENT)
 	);`
@@ -205,8 +205,8 @@ func GetListenerPorts() string {
 	return portList
 }
 
-func InsertLauncher(remoteIP string, listener string, listenerIP string, jitter string) {
-	InsertLauncherSQL := `INSERT INTO Launchers (remoteIP, listener, listenerIP, jitter)
+func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, Jitter string) {
+	InsertLauncherSQL := `INSERT INTO Launchers (RemoteIP, Listener, ListenerIP, Jitter)
 	VALUES (?, ?, ?, ?)`
 
 	statement, err := db.Prepare(InsertLauncherSQL)
@@ -214,7 +214,7 @@ func InsertLauncher(remoteIP string, listener string, listenerIP string, jitter 
 		log.Fatalln(err)
 	}
 
-	_, err = statement.Exec(remoteIP, listener, listenerIP, jitter) //execute our statement
+	_, err = statement.Exec(RemoteIP, Listener, ListenerIP, Jitter) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}

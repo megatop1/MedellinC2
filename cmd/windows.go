@@ -95,34 +95,36 @@ func promptWindowsSelect(pc promptContent) string {
 
 func createWindowsPayload() {
 	payloadNamePromptContent := promptContent{
-		"Please enter in a name for your payload: ",
-		"Payload Name: ",
+		"Please enter in the remote IP: ",
+		"Remote IP: ",
 	}
 	payloadName := promptGetWindowsInput(payloadNamePromptContent)
 
 	//payload type
 	windowsPayloadPromptContent := promptContent{
-		"Please choose a payload type",
-		fmt.Sprintf("Windows Payloads Types: %s", payloadName),
+		"Please choose an existing listener type",
+		"Listener: ",
 	}
 
 	payload := promptGetWindowsInput(windowsPayloadPromptContent)
 
 	definitionJitter := promptContent{
-		"Please choose a jitter percentage",
-		fmt.Sprintf("Enter jitter percent: , %s", payload),
+		"Please choose a local IP",
+		"LHOST: ",
 	}
 
 	jitter := promptGetWindowsInput(definitionJitter)
 
 	definitionListenerIP := promptContent{
-		"Please enter a listener IP",
-		fmt.Sprintf("Please enter the listener IP: %s", jitter),
+		"Please enter a jitter percentage",
+		"Please enter desired jitter percentage: %",
 	}
 
 	listenerIP := promptGetWindowsInput(definitionListenerIP)
 
 	data.InsertLauncher(payloadName, payload, jitter, listenerIP)
+
+	print("Launcher created\n")
 }
 
 func init() {
