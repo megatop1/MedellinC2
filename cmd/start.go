@@ -194,9 +194,6 @@ func checkListenerPorts() {
 	//print("current listeners running on ports: ")
 
 	for i := 0; i < len(v); i++ {
-		/*
-			Implement logic to create a listener on a port if its in the database
-		*/
 		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i]) //create listener on v[i] (index of the array storing the listener ports)
 		if err != nil {
 			//log.Fatalln(err)
