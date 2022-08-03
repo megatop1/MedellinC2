@@ -3,12 +3,6 @@ Welcome to Medellin C2! The development of this C2 is being used to enhance my c
 
 ### Structure
 ```
-server
-   | 
-    server.go
-data
-   | 
-    data.go
 cmd
    | 
     create.go
@@ -18,6 +12,14 @@ cmd
     root.go
     server.go
     start.go
+data
+   | 
+    data.go
+launchers
+    | 
+    (Contains auto-generated launchers)
+MedellinC2 (executable)
+
 MedellinC2
 ```
 ![server](server_design.PNG)
@@ -31,4 +33,5 @@ MedellinC2
 - `./MedellinC2 server`: Displays the server menu
 - `./MedellinC2 server start`: Starts the C2 server, which allows listeners to listen for connections from agents
 - `./Medellinc2 launcher`: Displays the launchers menu
-- `./MedellinC2 launcher winEXE`: Create a windows launcher (payload)
+- `./MedellinC2 launcher windows`: Create a windows launcher (payload)
+- `./MedellinC2 launcher linux`: Creates a linux launcher (payload)
