@@ -27,10 +27,11 @@ var windowsCmd = &cobra.Command{
 }
 
 type promptWindowsContent struct {
-	remoteIP   string
-	listener   string
-	listenerIP string
-	Jitter     string
+	remoteIP    string
+	listener    string
+	listenerIP  string
+	Jitter      string
+	payloadType string
 }
 
 func promptGetWindowsInput(pc promptContent) string {
@@ -122,7 +123,14 @@ func createWindowsPayload() {
 
 	listenerIP := promptGetWindowsInput(definitionListenerIP)
 
-	data.InsertLauncher(payloadName, payload, jitter, listenerIP)
+	definitionPayloadType := promptContent{
+		"Please enter a payload type",
+		"Please enter desired payloadtype: ",
+	}
+
+	payloadType := promptWindowsSelect(definitionPayloadType)
+
+	data.InsertLauncher(payloadName, payload, jitter, listenerIP, payloadType)
 
 	print("Launcher created\n")
 }
