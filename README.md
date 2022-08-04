@@ -48,6 +48,8 @@ MedellinC2 (executable)
 - `./Medellinc2 launcher`: Displays the launchers menu
 - `./MedellinC2 launcher windows`: Create a windows launcher (payload)
 - `./MedellinC2 launcher linux`: Creates a linux launcher (payload)
+- `./MedellinC2 agent`: Displays the agents menu
+- `./MedellinC2 agent view`: View all of the agents currently alive
 
 ### Future
 - Create agents workflow to execute commands on remote machines 
