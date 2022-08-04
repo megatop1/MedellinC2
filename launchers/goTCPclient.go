@@ -36,3 +36,7 @@ func main() {
 		}
 	}
 }
+
+func getUID() {
+
+}

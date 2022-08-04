@@ -65,6 +65,10 @@ func getAgentInfo() {
 	//get the IP
 	ipResult := GetHostIP().String()
 	print("IP Address: " + ipResult)
+	print("\n")
+
+	//If UUID Exists then DO NOT recreate it
+	// Look for repeating value in the UUID column
 
 	generateAgent(id, ipResult, hostname)
 }
@@ -72,6 +76,13 @@ func getAgentInfo() {
 func generateAgent(UUID, RemoteIP string, Hostname string) {
 	data.InsertAgent(UUID, RemoteIP, Hostname)
 
+}
+
+//check if agent is alive or not
+func checkAgentHealth() {
+	/* For each UUID, send a ping. If response is seen or not, change value in DB to Y/N */
+
+	/* For each callback, send a timestamp of the last command was ran and the callback time. Timestamp saved on server. If callback time the agent said is greater than timestamp last time the agent was found*/
 }
 
 //agent in the background SHAMELESSLY STOLEN FROM CHRISTIAN

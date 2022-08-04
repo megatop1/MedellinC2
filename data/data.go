@@ -92,7 +92,8 @@ func CreateAgentTable() {
 		"UUID"	TEXT NOT NULL,
 		"RemoteIP"	TEXT NOT NULL,
 		"Hostname" TEXT NOT NULL,
-		PRIMARY KEY("AID" AUTOINCREMENT)
+		"IsAlive" INTEGER NOT NULL DEFAULT 1 CHECK(IsAlive IN (0,1)),
+ 		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
 
 	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
@@ -231,4 +232,19 @@ func InsertAgent(UUID string, RemoteIP string, Hostname string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func CheckDuplicateAgentUUID() bool {
+	var flag bool
+
+	err := db.QueryRow("SELECT UUID, COUNT(*) c FROM Agent GROUP BY UUID HAVING c > 1;")
+	if err != nil {
+		print("UUID Does Not Repeat\n" + "Generating Agent...\n")
+		//log.Fatalln(err) //log error if it occurs to the console
+		flag = true
+	} else {
+		print("UUID Repeats")
+		flag = false
+	}
+	return flag
 }

