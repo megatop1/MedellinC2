@@ -78,6 +78,10 @@ func generateAgent(UUID, RemoteIP string, Hostname string) {
 
 }
 
+func listAliveAgents() {
+
+}
+
 //check if agent is alive or not
 func checkAgentHealth() {
 	/* For each UUID, send a ping. If response is seen or not, change value in DB to Y/N */

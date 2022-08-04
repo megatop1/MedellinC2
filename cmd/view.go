@@ -5,8 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +15,12 @@ var viewCmd = &cobra.Command{
 	Short: "View a list of active agents",
 	Long:  `View a list of agents that are still currently active and connected to the C2 server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Active Agents:\n")
+		viewAliveAgents()
 	},
+}
+
+func viewAliveAgents() {
+	data.CheckAgentAlive()
 }
 
 func init() {

