@@ -5,12 +5,9 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"net"
 	"os"
-	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -116,8 +113,9 @@ func createLinuxPayload() {
 
 	if payloadType != "" {
 		if payloadType == "go" {
-			print("generating bash launcher...\n")
-			goLauncher(remoteIP, remotePort)
+			print("generating go launcher...\n")
+			//call go launcher function
+			//launchers.goLauncher()
 		} else if payloadType == "executab;e" {
 			print("generating executable launcher...\n")
 			//powershellLauncher(remoteIP, remotePort)
@@ -166,29 +164,6 @@ func promptLinuxSelect(pc promptContent) string {
 
 func bashLauncher() {
 
-}
-
-func goLauncher(remoteIP string, remotePort string) {
-	//CONNECT := arguments[1]
-	c, err := net.Dial("tcp", remoteIP+":"+remotePort)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
-		fmt.Fprintf(c, text+"\n")
-
-		message, _ := bufio.NewReader(c).ReadString('\n')
-		fmt.Print("->: " + message)
-		if strings.TrimSpace(string(text)) == "STOP" {
-			fmt.Println("TCP client exiting...")
-			return
-		}
-	}
 }
 
 func executableLauncher() {

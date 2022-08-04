@@ -71,9 +71,10 @@ func getAgentInfo() {
 
 func generateAgent(UUID, RemoteIP string, Hostname string) {
 	data.InsertAgent(UUID, RemoteIP, Hostname)
+
 }
 
-//agent in the background
+//agent in the background SHAMELESSLY STOLEN FROM CHRISTIAN
 func agentForeground() {
 
 }

