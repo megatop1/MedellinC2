@@ -37,11 +37,13 @@ func GetHostIP() (hostIP net.IP) {
 	return
 }
 
-func passConnectionToAgent() {
-
+/* Slice of socket linked to UID */
+type ConnDetails struct {
+	connection net.Conn
+	UID        string
 }
 
-func getAgentInfo() {
+func getAgentInfoAndGenerateAgent() {
 	//get the hostname
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -79,7 +81,6 @@ func getAgentInfo() {
 
 func generateAgent(UUID, RemoteIP string, Hostname string) {
 	data.InsertAgent(UUID, RemoteIP, Hostname)
-
 }
 
 func listAliveAgents() {
@@ -101,3 +102,5 @@ func agentForeground() {
 func init() {
 	rootCmd.AddCommand(agentCmd)
 }
+
+/* TESTING */

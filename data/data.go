@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql" //go database driver package
+	"fmt"
 	"log"
 	"strconv"
 
@@ -271,7 +272,7 @@ func GetAliveAgents() {
 	}
 }
 
-func getAgentInformation() {
+func GetAgentInformation() {
 	row, err := db.Query("SELECT * FROM Agents WHERE UUID =%s")
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
@@ -295,4 +296,25 @@ func getAgentInformation() {
 		log.Println("Listener Name:", Name, "|", IP, "| Port:", Port, "| Connected Agents:", ActiveConnectedAgents)
 	}
 
+}
+
+func GetAgentUUID() {
+	var uuid string
+	fmt.Print("Enter Agent UUID: ")
+	fmt.Scanln(&uuid)
+	row, err := db.Query("SELECT * FROM Agent WHERE UUID = \" " + uuid + " \" ")
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	} else {
+		print("Agent is in the database\n")
+	}
+	//close the row once we reach end of the function
+	defer row.Close()
+
+	for row.Next() {
+		var UUID string
+
+		err = row.Scan(&UUID)
+		log.Println("UUID Exists!\n")
+	}
 }

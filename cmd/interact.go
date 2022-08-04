@@ -5,12 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bufio"
-	"fmt"
-	"net"
-	"strings"
-	"time"
-
+	"github.com/megatop1/MedellinC2/data"
 	"github.com/spf13/cobra"
 )
 
@@ -20,18 +15,26 @@ var interactCmd = &cobra.Command{
 	Short: "Interact with a particular agent",
 	Long:  `Interact and runs commands on a specific agent`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("interact called")
-		//sendRemoteCommand(con net.Conn)
+		remoteCommand()
+		/* Code to Get User Input and send over channel  */
 	},
 }
 
-func sendRemoteCommand(con net.Conn) {
-	//Step 1: Ask user to enter in agent UUID (name in the future)
-	fmt.Print("Enter Agent UUID: ")
-	var uuid string
-	fmt.Scanln(&uuid)
-	println("UUID: " + uuid)
+func remoteCommand() {
+	/* Step 1: Ask user to enter in agent UUID (name in the future) */
 
+	/* Step 2: Checkf if UUID is in DB */
+	data.GetAgentUUID()
+}
+
+func sendRemoteCommand() {
+	//Step 1: Ask user to enter in agent UUID (name in the future)
+	/*
+		fmt.Print("Enter Agent UUID: ")
+		var uuid string
+		fmt.Scanln(&uuid)
+		println("UUID: " + uuid)
+	*/
 	//If UID is in Database
 
 	//Step 2: Check if the agent is alive
@@ -44,34 +47,23 @@ func sendRemoteCommand(con net.Conn) {
 		var hostname string */
 
 	//Step 4: Open up interactive CLI menu with the agent
-	l, err := net.Listen("tcp", "0.0.0.0:4444")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer l.Close()
+	/*
+		for {
+			reader := bufio.NewReader(os.Stdin) //Read User Input (data) using buffer io package from the connection
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
+			fmt.Fprintf(con, text+"\n")
 
-	//con, err := l.Accept()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for {
-		netData, err := bufio.NewReader(con).ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			return
+			message, _ := bufio.NewReader(con).ReadString('\n')
+			fmt.Print("->: " + message)
+			if strings.TrimSpace(string(text)) == "STOP" {
+				fmt.Println("TCP client exiting...")
+				return
+			}
 		}
-		if strings.TrimSpace(string(netData)) == "STOP" {
-			fmt.Println("Exiting TCP server!")
-			return
-		}
+	*/
+	//Map UID to a connection
 
-		fmt.Print("-> ", string(netData))
-		t := time.Now()
-		myTime := t.Format(time.RFC3339) + "\n"
-		con.Write([]byte(myTime))
-	}
 }
 
 func init() {
