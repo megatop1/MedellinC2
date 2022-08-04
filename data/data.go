@@ -249,7 +249,7 @@ func CheckDuplicateAgentUUID() bool {
 	return flag
 }
 
-func CheckAgentAlive() {
+func GetAliveAgents() {
 	var uuid string
 	print("-----------Alive Agents-----------\n")
 	rows, err := db.Query("SELECT UUID FROM Agent WHERE IsAlive=1")
@@ -269,4 +269,30 @@ func CheckAgentAlive() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func getAgentInformation() {
+	row, err := db.Query("SELECT * FROM Agents WHERE UUID =%s")
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	}
+	//close the row once we reach end of the function
+	defer row.Close()
+
+	//run through all the rows and print them out to the terminal
+	for row.Next() {
+		var LID int
+		var Name string
+		var Port int
+		var Protocol string
+		var IP string
+		var ActiveConnectedAgents int
+
+		err = row.Scan(&LID, &Name, &Port, &Protocol, &IP, &ActiveConnectedAgents)
+		if err != nil { //if there is an issue scanning the row print this error to the console
+			log.Fatalln(err)
+		}
+		log.Println("Listener Name:", Name, "|", IP, "| Port:", Port, "| Connected Agents:", ActiveConnectedAgents)
+	}
+
 }

@@ -20,7 +20,7 @@ var viewCmd = &cobra.Command{
 }
 
 func viewAliveAgents() {
-	data.CheckAgentAlive()
+	data.GetAliveAgents()
 }
 
 func init() {

@@ -37,6 +37,10 @@ func GetHostIP() (hostIP net.IP) {
 	return
 }
 
+func passConnectionToAgent() {
+
+}
+
 func getAgentInfo() {
 	//get the hostname
 	hostname, err := os.Hostname()
