@@ -10,7 +10,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -60,20 +59,23 @@ func handleClientRequest(con net.Conn) {
 		/*Generate Agent in DB */
 		go getAgentInfoAndGenerateAgent()
 
-		/* Issue Commands Remotely */
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print(">> ")
-			text, _ := reader.ReadString('\n')
-			fmt.Fprintf(con, text+"\n")
+		/* Check if any commands have been sent to the database */
 
-			message, _ := bufio.NewReader(con).ReadString('\n')
-			fmt.Print("->: " + message)
-			if strings.TrimSpace(string(text)) == "STOP" {
-				fmt.Println("TCP client exiting...")
-				return
-			}
-		}
+		/* Issue Commands Remotely */
+		/*
+			for {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print(">> ")
+				text, _ := reader.ReadString('\n')
+				fmt.Fprintf(con, text+"\n")
+
+				message, _ := bufio.NewReader(con).ReadString('\n')
+				fmt.Print("->: " + message)
+				if strings.TrimSpace(string(text)) == "STOP" {
+					fmt.Println("TCP client exiting...")
+					return
+				}
+			} */
 	}
 
 	for {

@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql" //go database driver package
-	"fmt"
 	"log"
 	"strconv"
 
@@ -94,6 +93,7 @@ func CreateAgentTable() {
 		"RemoteIP"	TEXT NOT NULL,
 		"Hostname" TEXT NOT NULL,
 		"IsAlive" INTEGER NOT NULL DEFAULT 1 CHECK(IsAlive IN (0,1)),
+		"Command", TEXT,
  		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
 
@@ -298,10 +298,7 @@ func GetAgentInformation() {
 
 }
 
-func GetAgentUUID() {
-	var uuid string
-	fmt.Print("Enter Agent UUID: ")
-	fmt.Scanln(&uuid)
+func GetAgentUUID(uuid string) {
 	row, err := db.Query("SELECT * FROM Agent WHERE UUID = \" " + uuid + " \" ")
 	if err != nil {
 		log.Fatalln(err) //log error if it occurs to the console
@@ -316,5 +313,17 @@ func GetAgentUUID() {
 
 		err = row.Scan(&UUID)
 		log.Println("UUID Exists!\n")
+	}
+}
+
+func InsertCommandToAgent(command string, uuid string) {
+	statement, err := db.Prepare("UPDATE Agent SET Command =? WHERE UUID=?")
+	if err != nil { // if we get an error, log it to the console
+		log.Fatalln(err)
+	}
+
+	_, err = statement.Exec(command, uuid) //execute our statement
+	if err != nil {
+		log.Fatalln(err)
 	}
 }
