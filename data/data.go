@@ -362,19 +362,18 @@ func AwaitCommands() {
 		// Ensure we have the COMMAND from the DB that we want ran
 		fmt.Printf("UUID: %s Command: %s Default Delay: %d Time Until Next Command Is Sent: %d \n", UUID, Command, DefaultDelay, TimeToSendNextCommand)
 	}
-
-	// Step 2: If UUID (agent) HAS command, then SEND the command to be executed
 	if len(Command) > 0 {
+		// Step 2: If UUID (agent) HAS command, then SEND the command to be executed
 		fmt.Println("Sending command to be executed on agent %s", UUID)
 		// Step 3: Remove command from the database
 		println("Deleing command from the database")
-		statement, err := db.Prepare("UPDATE Agent SET Command=NULL WHERE Command IS NOT NULL")
+		result, err := db.Exec("UPDATE Agent SET Command=NULL WHERE Command IS NOT NULL")
 		if err != nil {
 			log.Fatalln(err)
+			print(result)
 		}
-		print(statement) //this is just to avoid an error, it does literally nothing
 	} else {
-		println("No commands to be executed at this time")
+		println("NO commands to be executed at this time")
 	}
 
 }
