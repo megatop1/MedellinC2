@@ -227,12 +227,8 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 }
 
 func InsertAgent(UUID string, RemoteIP string, Hostname string) {
-	/* Get Current Time
-	currentTime := time.Now()
-	fmt.Println(currentTime.Format("2006-01-02 15:04:05"))
-	*/
-	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname, DefaultDelay, CurrentTime)
-	VALUES (?, ?, ?, 10, datetime())`
+	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname, DefaultDelay, CurrentTime, TimeToSendNextCommand)
+	VALUES (?, ?, ?, 10, datetime(), datetime('now', '+.1 Minute') )`
 	//default DefaultDelay value will be 10 seconds
 	statement, err := db.Prepare(InsertAgentSQL)
 	if err != nil { // if we get an error, log it to the console
@@ -243,6 +239,9 @@ func InsertAgent(UUID string, RemoteIP string, Hostname string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	/* TimeToSendNextCommand (SendNextCommand = CurrentTime + (DefaultDelay * Jitter)) */
+	//db.Query("SELECT UUID FROM Agent WHERE IsAlive=1")
 }
 
 func CheckDuplicateAgentUUID() bool {
@@ -339,8 +338,15 @@ func InsertCommandToAgentTableInDB(command string, uuid string) {
 	}
 }
 
-func SendCommandToAgent() {
+func awaitCommands() {
+	/* for (DefaultDelayValue) { { */
+	/* Loop through every row based off of UUID in the DB */
+	/* Checks DefaultDelay value in Agent*/
+	/* Check Command section in Agent table for that UUID */
+	/* Send the command to the server */
 
+	/* Step 1: Loop through every agent in the Agent table*/
+	//row, err := db.Query("SELECT * FROM Agent WHERE CurrentTime = TimeToSendNextCommand")
 }
 
 func GetUserCommandFromDB() {
