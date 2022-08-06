@@ -228,7 +228,7 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 
 func InsertAgent(UUID string, RemoteIP string, Hostname string) {
 	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname, DefaultDelay, CurrentTime, TimeToSendNextCommand)
-	VALUES (?, ?, ?, 10, datetime(), datetime('now', '+.1 Minute') )`
+	VALUES (?, ?, ?, 10, datetime(), datetime('now', '+10 seconds') )`
 	//default DefaultDelay value will be 10 seconds
 	statement, err := db.Prepare(InsertAgentSQL)
 	if err != nil { // if we get an error, log it to the console
@@ -347,6 +347,7 @@ func awaitCommands() {
 
 	/* Step 1: Loop through every agent in the Agent table*/
 	//row, err := db.Query("SELECT * FROM Agent WHERE CurrentTime = TimeToSendNextCommand")
+
 }
 
 func GetUserCommandFromDB() {
