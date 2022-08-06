@@ -35,7 +35,6 @@ func CreateListenersTable() {
 		"Port"	INTEGER NOT NULL,
 		"Protocol" TEXT NOT NULL,
 		"IP" TEXT NOT NULL,
-		"DefaultDelay" INTEGER NOT NULL,
 		"ActiveConnectedAgents"	INTEGER NOT NULL,
 		PRIMARY KEY("LID" AUTOINCREMENT)
 	);`
@@ -99,6 +98,7 @@ func CreateAgentTable() {
 		"LastTimeCommandExecuted" TEXT,
 		"LastTimeCommandWasExecuted" TEXT,
 		"TimeToSendNextCommand" TEXT,
+		"CurrentTime" TEXT,
  		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
 
@@ -133,18 +133,18 @@ func CreateLaunchersTable() {
 	log.Println("CommandLog table created")
 }
 
-func InsertListener(name string, port string, IP string, protocol string, defaultDelay int) {
+func InsertListener(name string, port string, IP string, protocol string) {
 	//randomly generate a LID (Listeners Unique ID)
 
-	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol, IP, ActiveConnectedAgents, defaultDelay)
-	VALUES (?, ?, ?, ?, 0, ?)`
+	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol, IP, ActiveConnectedAgents)
+	VALUES (?, ?, ?, ?, 0)`
 
 	statement, err := db.Prepare(InsertListenerSQL)
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)
 	}
 
-	_, err = statement.Exec(name, port, protocol, IP, defaultDelay) //execute our statement
+	_, err = statement.Exec(name, port, protocol, IP) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -227,9 +227,13 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 }
 
 func InsertAgent(UUID string, RemoteIP string, Hostname string) {
-	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname)
-	VALUES (?, ?, ?)`
-
+	/* Get Current Time
+	currentTime := time.Now()
+	fmt.Println(currentTime.Format("2006-01-02 15:04:05"))
+	*/
+	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname, DefaultDelay, CurrentTime)
+	VALUES (?, ?, ?, 10, datetime())`
+	//default DefaultDelay value will be 10 seconds
 	statement, err := db.Prepare(InsertAgentSQL)
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)

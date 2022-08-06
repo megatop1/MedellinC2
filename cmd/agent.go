@@ -90,7 +90,7 @@ func awaitCommands() {
 	/* Check Command section in Agent table for that UUID */
 	/* Send the command to the server */
 
-	/* Step 1: Loop through every UUID in the database */
+	/* Step 1: Loop through every agent in the Agent table*/
 
 }
 
