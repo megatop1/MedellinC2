@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 
 	"github.com/manifoldco/promptui"
 	"github.com/megatop1/MedellinC2/data"
@@ -127,9 +128,21 @@ func createNewListener() { //function to construct our listener
 		"Please provide a protocol",
 		fmt.Sprintf("Select the protocol do you want to use for your listener: ", Name), //pass the listener name as an argument
 	}
+
 	Protocol := promptGetSelect(protocolPromptContent) //capture the protocol as an input from the user
 
-	data.InsertListener(Name, Port, IP, Protocol)
+	defaultDelayPromptContent := promptContent{
+		"Please enter in Default Delay",
+		"Enter value for DefaultDelay in seconds: ",
+	}
+
+	defaultDelay := promptGetInput(defaultDelayPromptContent)
+	intDefaultDelay, err := strconv.Atoi(defaultDelay) //convert default delay user input string to an integer
+
+	data.InsertListener(Name, Port, IP, Protocol, intDefaultDelay)
+	if err != nil {
+		panic(err)
+	}
 
 	// Generate the listener using data from the user
 	// Create the TCP connection to your attackers Netcat

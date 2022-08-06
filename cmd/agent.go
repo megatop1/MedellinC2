@@ -83,6 +83,17 @@ func generateAgent(UUID, RemoteIP string, Hostname string) {
 	data.InsertAgent(UUID, RemoteIP, Hostname)
 }
 
+func awaitCommands() {
+	/* for (DefaultDelayValue) { { */
+	/* Loop through every row based off of UUID in the DB */
+	/* Checks DefaultDelay value in Agent*/
+	/* Check Command section in Agent table for that UUID */
+	/* Send the command to the server */
+
+	/* Step 1: Loop through every UUID in the database */
+
+}
+
 func listAliveAgents() {
 
 }

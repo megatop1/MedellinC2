@@ -35,6 +35,7 @@ func CreateListenersTable() {
 		"Port"	INTEGER NOT NULL,
 		"Protocol" TEXT NOT NULL,
 		"IP" TEXT NOT NULL,
+		"DefaultDelay" INTEGER NOT NULL,
 		"ActiveConnectedAgents"	INTEGER NOT NULL,
 		PRIMARY KEY("LID" AUTOINCREMENT)
 	);`
@@ -93,7 +94,11 @@ func CreateAgentTable() {
 		"RemoteIP"	TEXT NOT NULL,
 		"Hostname" TEXT NOT NULL,
 		"IsAlive" INTEGER NOT NULL DEFAULT 1 CHECK(IsAlive IN (0,1)),
-		"Command", TEXT,
+		"Command" TEXT,
+		"DefaultDelay" INTEGER NOT NULL,
+		"LastTimeCommandExecuted" TEXT,
+		"LastTimeCommandWasExecuted" TEXT,
+		"TimeToSendNextCommand" TEXT,
  		PRIMARY KEY("AID" AUTOINCREMENT)
 	);`
 
@@ -128,18 +133,18 @@ func CreateLaunchersTable() {
 	log.Println("CommandLog table created")
 }
 
-func InsertListener(name string, port string, IP string, protocol string) {
+func InsertListener(name string, port string, IP string, protocol string, defaultDelay int) {
 	//randomly generate a LID (Listeners Unique ID)
 
-	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol, IP, ActiveConnectedAgents)
-	VALUES (?, ?, ?, ?, 0)`
+	InsertListenerSQL := `INSERT INTO Listeners (Name, Port, Protocol, IP, ActiveConnectedAgents, defaultDelay)
+	VALUES (?, ?, ?, ?, 0, ?)`
 
 	statement, err := db.Prepare(InsertListenerSQL)
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)
 	}
 
-	_, err = statement.Exec(name, port, protocol, IP) //execute our statement
+	_, err = statement.Exec(name, port, protocol, IP, defaultDelay) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -163,12 +168,13 @@ func DisplayAllListeners() {
 		var Protocol string
 		var IP string
 		var ActiveConnectedAgents int
+		var DefaultDelay int
 
 		err = row.Scan(&LID, &Name, &Port, &Protocol, &IP, &ActiveConnectedAgents)
 		if err != nil { //if there is an issue scanning the row print this error to the console
 			log.Fatalln(err)
 		}
-		log.Println("Listener Name:", Name, "|", IP, "| Port:", Port, "| Connected Agents:", ActiveConnectedAgents)
+		log.Println("Listener Name:", Name, "|", IP, "| Port:", Port, "| Connected Agents:", ActiveConnectedAgents, "| DefaultDelay: ", DefaultDelay)
 	}
 }
 
@@ -316,7 +322,8 @@ func GetAgentUUID(uuid string) {
 	}
 }
 
-func InsertCommandToAgent(command string, uuid string) {
+/* Insert's the User's Command to the Command column in the Agent table in the Database */
+func InsertCommandToAgentTableInDB(command string, uuid string) {
 	statement, err := db.Prepare("UPDATE Agent SET Command =? WHERE UUID=?")
 	if err != nil { // if we get an error, log it to the console
 		log.Fatalln(err)
@@ -325,5 +332,31 @@ func InsertCommandToAgent(command string, uuid string) {
 	_, err = statement.Exec(command, uuid) //execute our statement
 	if err != nil {
 		log.Fatalln(err)
+	}
+}
+
+func SendCommandToAgent() {
+
+}
+
+func GetUserCommandFromDB() {
+	var uuid string
+	print("-----------Alive Agents-----------\n")
+	rows, err := db.Query("SELECT UUID FROM Agent WHERE IsAlive=1")
+	if err != nil {
+		log.Fatalln(err) //log error if it occurs to the console
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&uuid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//log.Println(uuid)
+		println(uuid)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
 	}
 }
