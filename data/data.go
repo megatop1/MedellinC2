@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql" //go database driver package
+	"fmt"
 	"log"
 	"strconv"
 
@@ -88,7 +89,6 @@ func CreateCommandLogTable() {
 func CreateAgentTable() {
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS "Agent" (
-		"AID"	INTEGER NOT NULL,
 		"UUID"	TEXT NOT NULL,
 		"RemoteIP"	TEXT NOT NULL,
 		"Hostname" TEXT NOT NULL,
@@ -96,9 +96,9 @@ func CreateAgentTable() {
 		"Command" TEXT,
 		"DefaultDelay" INTEGER NOT NULL,
 		"LastTimeCommandExecuted" TEXT,
-		"TimeToSendNextCommand" TEXT,
+		"TimeToSendNextCommand" INTEGER,
 		"CurrentTime" TEXT,
- 		PRIMARY KEY("AID" AUTOINCREMENT)
+ 		PRIMARY KEY("UUID")
 	);`
 
 	statement, err := db.Prepare(createTableSQL) //db.Prepare returns a SQL statement and an error
@@ -227,7 +227,7 @@ func InsertLauncher(RemoteIP string, Listener string, ListenerIP string, RemoteP
 
 func InsertAgent(UUID string, RemoteIP string, Hostname string) {
 	InsertAgentSQL := `INSERT INTO Agent (UUID, RemoteIP, Hostname, DefaultDelay, CurrentTime, TimeToSendNextCommand)
-	VALUES (?, ?, ?, 10, datetime(), datetime('now', '+10 seconds') )`
+	VALUES (?, ?, ?, 10, datetime(), 10)`
 	//default DefaultDelay value will be 10 seconds
 	statement, err := db.Prepare(InsertAgentSQL)
 	if err != nil { // if we get an error, log it to the console
@@ -337,33 +337,46 @@ func InsertCommandToAgentTableInDB(command string, uuid string) {
 	}
 }
 
-func AwaitCommands() bool {
-	var flag bool
+func AwaitCommands() {
 	/* for (DefaultDelayValue) { { */
 	/* Loop through every row based off of UUID in the DB */
 	/* Checks DefaultDelay value in Agent*/
 	/* Check Command section in Agent table for that UUID */
 	/* Send the command to the server */
-	var TimeToSendNextCommand string
-	var CurrentTime string
 
-	/* Step 1: Loop through every agent in the Agent table and check which agent's current time is equal to the time to send the next command*/
-	row, err := db.Query("SELECT UUID FROM Agent WHERE CurrentTime = TimeToSendNextCommand")
-	if err == sql.ErrNoRows {
-		print("No Commands need to be sent at this time")
+	var TimeToSendNextCommand int
+	var UUID string
+	var Command string
+	var DefaultDelay int
+
+	// Step 1: Check in agents table if any agent HAS command
+	row, err := db.Query("SELECT UUID, Command, DefaultDelay, TimeToSendNextCommand FROM Agent WHERE Command IS NOT NULL")
+	if err != nil {
+		log.Fatal(err)
 	}
-	//println(row)
-
 	for row.Next() {
-		err = row.Scan(&CurrentTime, TimeToSendNextCommand)
-		if err != nil { //if there is an issue scanning the row print this error to the console
+		// Get the UUID, Command, DefaultDelay, and TimeToSendNextCommand
+		if err := row.Scan(&UUID, &Command, &DefaultDelay, &TimeToSendNextCommand); err != nil {
+			log.Fatal(err)
+		}
+		// Ensure we have the COMMAND from the DB that we want ran
+		fmt.Printf("UUID: %s Command: %s Default Delay: %d Time Until Next Command Is Sent: %d \n", UUID, Command, DefaultDelay, TimeToSendNextCommand)
+	}
+
+	// Step 2: If UUID (agent) HAS command, then SEND the command to be executed
+	if len(Command) > 0 {
+		fmt.Println("Sending command to be executed on agent %s", UUID)
+		// Step 3: Remove command from the database
+		println("Deleing command from the database")
+		statement, err := db.Prepare("UPDATE Agent SET Command=NULL WHERE Command IS NOT NULL")
+		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Println("Current Time:", CurrentTime, "|", "Time Next Command Will Be Sent:", TimeToSendNextCommand)
-		println(err)
+		print(statement) //this is just to avoid an error, it does literally nothing
+	} else {
+		println("No commands to be executed at this time")
 	}
 
-	return flag
 }
 
 func GetUserCommandFromDB() {

